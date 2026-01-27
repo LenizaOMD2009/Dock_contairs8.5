@@ -11,14 +11,15 @@ final class Sale extends AbstractMigration
     {
         $table = $this->table('sale', ['id' => false, 'primary_key' => ['id']]);
         $table->addColumn('id', 'biginteger', ['identity' => true, 'null' => false])
-            ->addColumn('cliente_id', 'biginteger')
-            ->addColumn('empresa_id', 'biginteger')
-            ->addColumn('condicao_pagamento_id', 'biginteger')
-            ->addColumn('valor_total', 'decimal', ['precision' => 18, 'scale' => 2])
-            ->addColumn('status', 'string', ['limit' => 50])
-            ->addColumn('data_venda', 'datetime')
-            ->addColumn('criado_em', 'datetime', ['default' => 'CURRENT_TIMESTAMP'])
-            ->addColumn('atualizado_em', 'datetime', ['null' => true])
+              ->addColumn('id_customer', 'biginteger')
+              ->addColumn('valor_total', 'decimal', ['precision' => 18, 'scale' => 4, 'default' => 0])
+              ->addColumn('status', 'boolean', ['default' => 'ABERTA'])
+              ->addColumn('data_venda', 'datetime', ['default' => 'CURRENT_TIMESTAMP'])
+              ->addColumn('data_cadastro', 'datetime', ['null' => true, 'default' => 'CURRENT_TIMESTAMP'])
+              ->addColumn('data_alteracao', 'datetime', ['null' => true, 'default' => 'CURRENT_TIMESTAMP'])
+
+            ->addForeignKey('id_customer', 'customer', 'id', ['delete'=> 'RESTRICT', 'update'=> 'CASCADE'])
             ->create();
     }
 }
+

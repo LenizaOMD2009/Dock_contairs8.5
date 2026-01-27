@@ -7,33 +7,33 @@ use app\database\builder\SelectQuery;
 use app\database\builder\InsertQuery;
 use app\database\builder\UpdateQuery;
 
-class Empresas extends Base
+class Empresa extends Base
 {
 
     public function lista($request, $response)
     {
         $dadosTemplate = [
-            'titulo' => 'Lista da empresas'
+            'titulo' => 'Lista da empresa'
         ];
         return $this->getTwig()
-            ->render($response, $this->setView('listempresas'), $dadosTemplate)
+            ->render($response, $this->setView('listempresa'), $dadosTemplate)
             ->withHeader('Content-Type', 'text/html')
             ->withStatus(200);
     }
     public function cadastro($request, $response)
     {
         $dadosTemplate = [
-            'titulo' => 'Cadastro de empresas',
+            'titulo' => 'Cadastro de empresa',
             'acao' => 'c',
             'id' => '',
-            'empresas' => []
+            'empresa' => []
         ];
         return $this->getTwig()
-            ->render($response, $this->setView('empresas'), $dadosTemplate)
+            ->render($response, $this->setView('empresa'), $dadosTemplate)
             ->withHeader('Content-Type', 'text/html')
             ->withStatus(200);
     }
-    public function listempresas($request, $response)
+    public function listempresa($request, $response)
     {
         try {
             #Captura todas a variaveis de forma mais segura VARIAVEIS POST.
@@ -62,24 +62,24 @@ class Empresas extends Base
             #O termo pesquisado
             $term = $form['search']['value'] ?? '';
             
-            $query = SelectQuery::select('id,nome_fantasia,sobrenome_razao,cpf_cnpj,rg_ie,data_nascimento_abertura')->from('empresas');
+            $query = SelectQuery::select('id,nome_fantasia,sobrenome_razao,cpf_cnpj,rg_ie,data_nascimento_abertura')->from('empresa');
             
-            $queryTotal = SelectQuery::select('COUNT(*) as total')->from('empresas');
+            $queryTotal = SelectQuery::select('COUNT(*) as total')->from('empresa');
             $totalRecords = $queryTotal->fetch()['total'] ?? 0;
             
             if (!is_null($term) && ($term !== '')) {
-                $query->where('empresas.nome_fantasia', 'ilike', "%{$term}%", 'or')
-                    ->where('empresas.sobrenome_razao', 'ilike', "%{$term}%", 'or')
-                    ->where('empresas.cpf_cnpj', 'ilike', "%{$term}%", 'or')
-                    ->where('empresas.rg_ie', 'ilike', "%{$term}%", 'or')
-                    ->whereRaw("to_char(empresas.data_nascimento_abertura, 'YYYY-MM-DD') ILIKE '%{$term}%'");
+                $query->where('empresa.nome_fantasia', 'ilike', "%{$term}%", 'or')
+                    ->where('empresa.sobrenome_razao', 'ilike', "%{$term}%", 'or')
+                    ->where('empresa.cpf_cnpj', 'ilike', "%{$term}%", 'or')
+                    ->where('empresa.rg_ie', 'ilike', "%{$term}%", 'or')
+                    ->whereRaw("to_char(empresa.data_nascimento_abertura, 'YYYY-MM-DD') ILIKE '%{$term}%'");
 
-                $queryFiltered = SelectQuery::select('COUNT(*) as total')->from('empresas')
-                    ->where('empresas.nome_fantasia', 'ilike', "%{$term}%", 'or')
-                    ->where('empresas.sobrenome_razao', 'ilike', "%{$term}%", 'or')
-                    ->where('empresas.cpf_cnpj', 'ilike', "%{$term}%", 'or')
-                    ->where('empresas.rg_ie', 'ilike', "%{$term}%", 'or')
-                    ->whereRaw("to_char(empresas.data_nascimento_abertura, 'YYYY-MM-DD') ILIKE '%{$term}%'");
+                $queryFiltered = SelectQuery::select('COUNT(*) as total')->from('empresa')
+                    ->where('empresa.nome_fantasia', 'ilike', "%{$term}%", 'or')
+                    ->where('empresa.sobrenome_razao', 'ilike', "%{$term}%", 'or')
+                    ->where('empresa.cpf_cnpj', 'ilike', "%{$term}%", 'or')
+                    ->where('empresa.rg_ie', 'ilike', "%{$term}%", 'or')
+                    ->whereRaw("to_char(empresa.data_nascimento_abertura, 'YYYY-MM-DD') ILIKE '%{$term}%'");
                 $totalFiltered = $queryFiltered->fetch()['total'] ?? 0;
             } else {
                 $totalFiltered = $totalRecords;
@@ -99,7 +99,7 @@ class Empresas extends Base
                     $value['cpf_cnpj'],
                     $value['rg_ie'],
                     $value['data_nascimento_abertura'],
-                    "<a href='/empresas/alterar/{$value['id']}' class='btn btn-warning'>Editar</a>
+                    "<a href='/empresa/alterar/{$value['id']}' class='btn btn-warning'>Editar</a>
                     <button type='button'  onclick='Delete(" . $value['id'] . ");' class='btn btn-danger'>Excluir</button>"
                 ];
             }
@@ -134,15 +134,15 @@ class Empresas extends Base
       public function alterar($request, $response, $args)
     {
         $id = $args['id'];
-        $user = SelectQuery::select()->from('empresas')->where('id', '=', $id)->fetch();
+        $user = SelectQuery::select()->from('empresa')->where('id', '=', $id)->fetch();
         $dadosTemplate = [
             'acao' => 'e',
             'id' => $id,
-            'titulo' => 'Cadastro e alteracao de empresas',
-            'empresas' => $user
+            'titulo' => 'Cadastro e alteracao de empresa',
+            'empresa' => $user
         ];
         return $this->getTwig()
-            ->render($response, $this->setView('empresas'), $dadosTemplate)
+            ->render($response, $this->setView('empresa'), $dadosTemplate)
             ->withHeader('Content-Type', 'text/html')
             ->withStatus(200);
     }
@@ -154,7 +154,7 @@ class Empresas extends Base
             // Primeiro, deleta registros relacionados em contato
             try {
                 DeleteQuery::table('contato')
-                    ->where('id_empresas', '=', $id)
+                    ->where('id_empresa', '=', $id)
                     ->delete();
             } catch (\Exception $e) {
                 // Log ou ignore se não houver registros
@@ -163,23 +163,23 @@ class Empresas extends Base
             // Depois, deleta registros relacionados em endereco
             try {
                 DeleteQuery::table('endereco')
-                    ->where('id_empresas', '=', $id)
+                    ->where('id_empresa', '=', $id)
                     ->delete();
             } catch (\Exception $e) {
                 // Log ou ignore se não houver registros
             }
 
             // Finalmente, deleta o usuário
-            $IsDelete = DeleteQuery::table('empresas')
+            $IsDelete = DeleteQuery::table('empresa')
                 ->where('id', '=', $id)
                 ->delete();
 
             if (!$IsDelete) {
-                $data = ['status' => false, 'msg' => 'Erro ao deletar empresas', 'id' => $id];
+                $data = ['status' => false, 'msg' => 'Erro ao deletar empresa', 'id' => $id];
                 return $this->SendJson($response, $data, 200);
             }
             
-            $data = ['status' => true, 'msg' => 'empresas removido com sucesso!', 'id' => $id];
+            $data = ['status' => true, 'msg' => 'empresa removido com sucesso!', 'id' => $id];
             return $this->SendJson($response, $data, 200);
             
         } catch (\Throwable $th) {
@@ -199,11 +199,11 @@ class Empresas extends Base
                 'rg_ie' => $form['rg_ie'],
                 'data_nascimento_abertura' => $form['data_nascimento_abertura']
             ];
-            $IsUpdate = UpdateQuery::table('empresas')->set($FieldAndValues)->where('id', '=', $id)->update();
+            $IsUpdate = UpdateQuery::table('empresa')->set($FieldAndValues)->where('id', '=', $id)->update();
             if (!$IsUpdate) {
                 $data = [
                     'status' => false,
-                    'msg' => 'Erro ao atualizar empresas',
+                    'msg' => 'Erro ao atualizar empresa',
                     'id' => 0
                 ];
                 return $this->SendJson($response, $data, 200);
@@ -230,17 +230,17 @@ class Empresas extends Base
                 'rg_ie' => $form['rg_ie'] ?? null,
                 'data_nascimento_abertura' => $form['data_nascimento_abertura'] ?? null
             ];
-            $IsSave = InsertQuery::table('empresas')->save($FieldsAndValues);
+            $IsSave = InsertQuery::table('empresa')->save($FieldsAndValues);
 
             if (!$IsSave) {
-                $data = ['status' => false, 'msg' => 'Erro ao inserir empresas', 'id' => 0];
+                $data = ['status' => false, 'msg' => 'Erro ao inserir empresa', 'id' => 0];
                 return $this->SendJson($response, $data, 200);
             }
-            
-            $id = SelectQuery::select('id')->from('empresas')->order('id', 'desc')->fetch();
+
+            $id = SelectQuery::select('id')->from('empresa')->order('id', 'desc')->fetch();
             $data = [
                 'status' => true,
-                'msg' => 'empresas cadastrado com sucesso!',
+                'msg' => 'empresa cadastrado com sucesso!',
                 'id' => $id['id'] ?? 0
             ];
             return $this->SendJson($response, $data, 200);

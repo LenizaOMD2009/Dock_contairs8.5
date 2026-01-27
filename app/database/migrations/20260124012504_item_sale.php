@@ -11,12 +11,20 @@ final class ItemSale extends AbstractMigration
     {
         $table = $this->table('item_sale', ['id' => false, 'primary_key' => ['id']]);
         $table->addColumn('id', 'biginteger', ['identity' => true, 'null' => false])
-            ->addColumn('produto_id', 'biginteger')
+            ->addColumn('id_sale', 'biginteger')
+            ->addColumn('id_product', 'biginteger')
             ->addColumn('quantidade', 'integer')
             ->addColumn('preco_unitario', 'decimal', ['precision' => 18, 'scale' => 2])
             ->addColumn('preco_total', 'decimal', ['precision' => 18, 'scale' => 2])
-            ->addColumn('criado_em', 'datetime', ['default' => 'CURRENT_TIMESTAMP'])
-            ->addColumn('atualizado_em', 'datetime', ['null' => true])
+            ->addColumn('data_cadastro', 'datetime', ['null' => true, 'default' => 'CURRENT_TIMESTAMP'])
+            ->addColumn('data_atualizacao', 'datetime', ['null' => true, 'default' => 'CURRENT_TIMESTAMP'])
+
+            ->addForeignKey('id_sale', 'sale', 'id', ['delete'=> 'RESTRICT', 'update'=> 'CASCADE'])
+            ->addForeignKey('id_product', 'product', 'id', ['delete'=> 'RESTRICT', 'update'=> 'CASCADE'])
             ->create();       
     }
 }
+
+
+
+
