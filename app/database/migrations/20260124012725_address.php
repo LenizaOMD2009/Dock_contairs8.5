@@ -24,8 +24,8 @@ final class Address extends AbstractMigration
             ->addColumn('estado', 'string', ['limit' => 50])
             ->addColumn('referencia', 'string', ['limit' => 50])
             ->addColumn('complemento', 'string', ['limit' => 50])
-        ->addColumn('data_cadastro', 'datetime', ['null' => true, 'default' => 'CURRENT_TIMESTAMP'])
-        ->addColumn('data_atualizacao', 'datetime', ['null' => true, 'default' => 'CURRENT_TIMESTAMP'])
+            ->addColumn('data_cadastro', 'datetime', ['null' => true, 'default' => 'CURRENT_TIMESTAMP'])
+            ->addColumn('data_atualizacao', 'datetime', ['null' => true, 'default' => 'CURRENT_TIMESTAMP'])
         
         ->addForeignKey('id_customer', 'customer', 'id', ['delete'=> 'RESTRICT', 'update'=> 'CASCADE'])
         ->addForeignKey('id_users', 'users', 'id', ['delete'=> 'RESTRICT', 'update'=> 'CASCADE'])

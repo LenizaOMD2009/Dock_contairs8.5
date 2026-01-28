@@ -16,8 +16,8 @@ final class Company extends AbstractMigration
             ->addColumn('cpf_cnpj', 'text', ['null' => true])
             ->addColumn('rg_ie', 'text', ['null' => true])
             ->addColumn('ativo', 'boolean', ['null' => true])
-        ->addColumn('data_cadastro', 'datetime', ['null' => true, 'default' => 'CURRENT_TIMESTAMP'])
-        ->addColumn('data_atualizacao', 'datetime', ['null' => true, 'default' => 'CURRENT_TIMESTAMP'])
+            ->addColumn('data_cadastro', 'datetime', ['null' => true, 'default' => 'CURRENT_TIMESTAMP'])
+            ->addColumn('data_atualizacao', 'datetime', ['null' => true, 'default' => 'CURRENT_TIMESTAMP'])
          ->create();
     }
 }
