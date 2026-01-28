@@ -7,7 +7,7 @@ use app\database\builder\SelectQuery;
 use app\database\builder\InsertQuery;
 use app\database\builder\UpdateQuery;
 
-class cliente extends Base
+class Cliente extends Base
 {
 
     public function lista($request, $response)

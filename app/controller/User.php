@@ -35,12 +35,12 @@ class User extends Base
     public function alterar($request, $response, $args)
     {
         $id = $args['id'];
-        $user = SelectQuery::select()->from('usuario')->where('id', '=', $id)->fetch();
+        $user = SelectQuery::select()->from('users')->where('id', '=', $id)->fetch();
         $dadosTemplate = [
             'acao' => 'e',
             'id' => $id,
             'titulo' => 'Cadastro e alteracao de usuário',
-            'usuario' => $user
+            'users' => $user
         ];
         return $this->getTwig()
             ->render($response, $this->setView('user'), $dadosTemplate)
@@ -72,12 +72,12 @@ class User extends Base
         $orderField = $fields[$order];
         #O termo pesquisado
         $term = $form['search']['value'];
-        $query = SelectQuery::select('id,nome,sobrenome,cpf,rg')->from('usuario');
+        $query = SelectQuery::select('id,nome,sobrenome,cpf,rg')->from('users');
         if (!is_null($term) && ($term !== '')) {
-            $query->where('usuario.nome', 'ilike', "%{$term}%", 'or')
-                ->where('usuario.sobrenome', 'ilike', "%{$term}%", 'or')
-                ->where('usuario.cpf', 'ilike', "%{$term}%", 'or')
-                ->where('usuario.rg', 'ilike', "%{$term}%");
+            $query->where('users.nome', 'ilike', "%{$term}%", 'or')
+                ->where('users.sobrenome', 'ilike', "%{$term}%", 'or')
+                ->where('users.cpf', 'ilike', "%{$term}%", 'or')
+                ->where('users.rg', 'ilike', "%{$term}%");
         }
 
         $users = $query
@@ -93,7 +93,7 @@ class User extends Base
                 $value['sobrenome'],
                 $value['cpf'],
                 $value['rg'],
-                "<a href='/usuario/alterar/{$value['id']}' class='btn btn-warning'>Editar</a>
+                "<a href='/users/alterar/{$value['id']}' class='btn btn-warning'>Editar</a>
                  <button type='button'  onclick='Delete(" . $value['id'] . ");' class='btn btn-danger'>Excluir</button>"
             ];
         }
@@ -125,7 +125,7 @@ class User extends Base
                 #'ativo' => (isset($form['ativo']) and $form['ativo'] === 'true') ? true : false,
                 #'administrador' => (isset($form['administrador']) and $form['administrador'] === 'true') ? true : false
             ];
-            $IsInsert = InsertQuery::table('usuario')->save($FieldAndValues);
+            $IsInsert = InsertQuery::table('users')->save($FieldAndValues);
             if (!$IsInsert) {
                 $data = [
                     'status' => false,
@@ -138,8 +138,7 @@ class User extends Base
                     ->withHeader('Content-Type', 'application/json')
                     ->withStatus(200);
             }
-
-            $id = SelectQuery::select('id')->from('usuario')->order('id', 'desc')->fetch();
+            $id = SelectQuery::select('id')->from('users')->order('id', 'desc')->fetch();
 
             $data = [
                 'status' => true,
@@ -158,11 +157,11 @@ class User extends Base
     {
         try {
             $id = $_POST['id'];
-            
+
             // Primeiro, deleta registros relacionados em contato
             try {
                 DeleteQuery::table('contato')
-                    ->where('id_usuario', '=', $id)
+                    ->where('id_users', '=', $id)
                     ->delete();
             } catch (\Exception $e) {
                 // Log ou ignore se não houver registros
@@ -171,14 +170,14 @@ class User extends Base
             // Depois, deleta registros relacionados em endereco
             try {
                 DeleteQuery::table('endereco')
-                    ->where('id_usuario', '=', $id)
+                    ->where('id_users', '=', $id)
                     ->delete();
             } catch (\Exception $e) {
                 // Log ou ignore se não houver registros
             }
 
             // Finalmente, deleta o usuário
-            $IsDelete = DeleteQuery::table('usuario')
+            $IsDelete = DeleteQuery::table('users')
                 ->where('id', '=', $id)
                 ->delete();
 
@@ -186,10 +185,9 @@ class User extends Base
                 $data = ['status' => false, 'msg' => 'Erro ao deletar usuário', 'id' => $id];
                 return $this->SendJson($response, $data, 200);
             }
-            
+
             $data = ['status' => true, 'msg' => 'Usuário removido com sucesso!', 'id' => $id];
             return $this->SendJson($response, $data, 200);
-            
         } catch (\Throwable $th) {
             $data = ['status' => false, 'msg' => 'Erro: ' . $th->getMessage(), 'id' => $_POST['id'] ?? 0];
             return $this->SendJson($response, $data, 500);
@@ -209,7 +207,7 @@ class User extends Base
                 #'ativo' => (isset($form['ativo']) and $form['ativo'] === 'true') ? true : false,
                 #'administrador' => (isset($form['administrador']) and $form['administrador'] === 'true') ? true : false
             ];
-            $IsUpdate = UpdateQuery::table('usuario')->set($FieldAndValues)->where('id', '=', $id)->update();
+            $IsUpdate = UpdateQuery::table('users')->set($FieldAndValues)->where('id', '=', $id)->update();
             if (!$IsUpdate) {
                 $data = [
                     'status' => false,
