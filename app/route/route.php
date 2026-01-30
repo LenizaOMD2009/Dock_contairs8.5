@@ -29,6 +29,7 @@ $app->group('/usuario', function (RouteCollectorProxy $group) {
     $group->post('/insert', User::class . ':insert');
     $group->get('/alterar/{id}', User::class . ':alterar'); #->add(Auth::route());
     $group->post('/delete', User::class . ':delete');
+    $group->get('/print', User::class . ':print'); #->add(Auth::route());
 });
 $app->group('/cliente', function (RouteCollectorProxy $group) {
     $group->get('/lista', cliente::class . ':lista'); #->add(Auth::route());
