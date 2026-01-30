@@ -62,24 +62,24 @@ class Empresa extends Base
             #O termo pesquisado
             $term = $form['search']['value'] ?? '';
             
-            $query = SelectQuery::select('id,nome_fantasia,sobrenome_razao,cpf_cnpj,rg_ie,data_nascimento_abertura')->from('empresa');
+            $query = SelectQuery::select('id,nome_fantasia,sobrenome_razao,cpf_cnpj,rg_ie,data_nascimento_abertura')->from('company');
             
-            $queryTotal = SelectQuery::select('COUNT(*) as total')->from('empresa');
+            $queryTotal = SelectQuery::select('COUNT(*) as total')->from('company');
             $totalRecords = $queryTotal->fetch()['total'] ?? 0;
             
             if (!is_null($term) && ($term !== '')) {
-                $query->where('empresa.nome_fantasia', 'ilike', "%{$term}%", 'or')
-                    ->where('empresa.sobrenome_razao', 'ilike', "%{$term}%", 'or')
-                    ->where('empresa.cpf_cnpj', 'ilike', "%{$term}%", 'or')
-                    ->where('empresa.rg_ie', 'ilike', "%{$term}%", 'or')
-                    ->whereRaw("to_char(empresa.data_nascimento_abertura, 'YYYY-MM-DD') ILIKE '%{$term}%'");
+                $query->where('company.nome_fantasia', 'ilike', "%{$term}%", 'or')
+                    ->where('company.sobrenome_razao', 'ilike', "%{$term}%", 'or')
+                    ->where('company.cpf_cnpj', 'ilike', "%{$term}%", 'or')
+                    ->where('company.rg_ie', 'ilike', "%{$term}%")
+                    ->where('company.data_nascimento_abertura', 'ilike', "%{$term}%");
 
-                $queryFiltered = SelectQuery::select('COUNT(*) as total')->from('empresa')
-                    ->where('empresa.nome_fantasia', 'ilike', "%{$term}%", 'or')
-                    ->where('empresa.sobrenome_razao', 'ilike', "%{$term}%", 'or')
-                    ->where('empresa.cpf_cnpj', 'ilike', "%{$term}%", 'or')
-                    ->where('empresa.rg_ie', 'ilike', "%{$term}%", 'or')
-                    ->whereRaw("to_char(empresa.data_nascimento_abertura, 'YYYY-MM-DD') ILIKE '%{$term}%'");
+                $queryFiltered = SelectQuery::select('COUNT(*) as total')->from('company')
+                    ->where('company.nome_fantasia', 'ilike', "%{$term}%", 'or')
+                    ->where('company.sobrenome_razao', 'ilike', "%{$term}%", 'or')
+                    ->where('company.cpf_cnpj', 'ilike', "%{$term}%", 'or')
+                    ->where('company.rg_ie', 'ilike', "%{$term}%")
+                    ->where('company.data_nascimento_abertura', 'ilike', "%{$term}%");
                 $totalFiltered = $queryFiltered->fetch()['total'] ?? 0;
             } else {
                 $totalFiltered = $totalRecords;
@@ -133,13 +133,28 @@ class Empresa extends Base
     }
       public function alterar($request, $response, $args)
     {
-        $id = $args['id'];
-        $user = SelectQuery::select()->from('empresa')->where('id', '=', $id)->fetch();
+        $id = $args['id'] ?? null;
+        
+        // Validar se o ID é válido
+        if (!$id || !is_numeric($id)) {
+            $dadosTemplate = [
+                'acao' => 'c',
+                'id' => '',
+                'titulo' => 'Cadastro e alteracao de empresa',
+                'empresa' => null
+            ];
+            return $this->getTwig()
+                ->render($response, $this->setView('empresa'), $dadosTemplate)
+                ->withHeader('Content-Type', 'text/html')
+                ->withStatus(200);
+        }
+        
+        $empresa = SelectQuery::select()->from('company')->where('id', '=', $id)->fetch();
         $dadosTemplate = [
             'acao' => 'e',
             'id' => $id,
             'titulo' => 'Cadastro e alteracao de empresa',
-            'empresa' => $user
+            'empresa' => $empresa
         ];
         return $this->getTwig()
             ->render($response, $this->setView('empresa'), $dadosTemplate)
@@ -154,7 +169,7 @@ class Empresa extends Base
             // Primeiro, deleta registros relacionados em contato
             try {
                 DeleteQuery::table('contato')
-                    ->where('id_empresa', '=', $id)
+                    ->where('id_company', '=', $id)
                     ->delete();
             } catch (\Exception $e) {
                 // Log ou ignore se não houver registros
@@ -163,14 +178,14 @@ class Empresa extends Base
             // Depois, deleta registros relacionados em endereco
             try {
                 DeleteQuery::table('endereco')
-                    ->where('id_empresa', '=', $id)
+                    ->where('id_company', '=', $id)
                     ->delete();
             } catch (\Exception $e) {
                 // Log ou ignore se não houver registros
             }
 
             // Finalmente, deleta o usuário
-            $IsDelete = DeleteQuery::table('empresa')
+            $IsDelete = DeleteQuery::table('company')
                 ->where('id', '=', $id)
                 ->delete();
 
@@ -199,7 +214,7 @@ class Empresa extends Base
                 'rg_ie' => $form['rg_ie'],
                 'data_nascimento_abertura' => $form['data_nascimento_abertura']
             ];
-            $IsUpdate = UpdateQuery::table('empresa')->set($FieldAndValues)->where('id', '=', $id)->update();
+            $IsUpdate = UpdateQuery::table('company')->set($FieldAndValues)->where('id', '=', $id)->update();
             if (!$IsUpdate) {
                 $data = [
                     'status' => false,
@@ -230,17 +245,17 @@ class Empresa extends Base
                 'rg_ie' => $form['rg_ie'] ?? null,
                 'data_nascimento_abertura' => $form['data_nascimento_abertura'] ?? null
             ];
-            $IsSave = InsertQuery::table('empresa')->save($FieldsAndValues);
+            $IsSave = InsertQuery::table('company')->save($FieldsAndValues);
 
             if (!$IsSave) {
                 $data = ['status' => false, 'msg' => 'Erro ao inserir empresa', 'id' => 0];
                 return $this->SendJson($response, $data, 200);
             }
-
-            $id = SelectQuery::select('id')->from('empresa')->order('id', 'desc')->fetch();
+            
+            $id = SelectQuery::select('id')->from('company')->order('id', 'desc')->fetch();
             $data = [
                 'status' => true,
-                'msg' => 'empresa cadastrado com sucesso!',
+                'msg' => 'empresa cadastrada com sucesso!',
                 'id' => $id['id'] ?? 0
             ];
             return $this->SendJson($response, $data, 200);

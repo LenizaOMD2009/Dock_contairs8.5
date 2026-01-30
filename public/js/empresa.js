@@ -33,7 +33,7 @@ async function insert() {
         //Em caso de erro encerramos o processo.
         return;
     }
-    const response = await Requests.SetForm('form').Post('/empresas/insert');
+    const response = await Requests.SetForm('form').Post('/empresa/insert');
     if (!response.status) {
         Swal.fire({
             icon: "error",
@@ -60,8 +60,8 @@ async function insert() {
             Swal.showLoading();
         },
         willClose: () => {
-            //Redireciona automaticamente para a lista de empresas após insert bem-sucedido
-            window.location.href = '/empresas/lista';
+            //Redireciona automaticamente para a lista de fornecedores após insert bem-sucedido
+            window.location.href = '/empresa/lista';
         }
     });
 }
@@ -84,7 +84,7 @@ async function update() {
         //Em caso de erro encerramos o processo.
         return;
     }
-    const response = await Requests.SetForm('form').Post('/empresas/update');
+    const response = await Requests.SetForm('form').Post('/empresa/update');
     if (!response.status) {
         Swal.fire({
             icon: "error",
@@ -108,8 +108,8 @@ async function update() {
             Swal.showLoading();
         },
         willClose: () => {
-            //Redireciona automaticamente para a lista de empresas
-            window.location.href = '/empresas/lista';
+            //Redireciona automaticamente para a lista de fornecedores
+            window.location.href = '/empresa/lista';
         }
     });
 }

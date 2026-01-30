@@ -15,21 +15,21 @@ const tabela = new $('#tabela').DataTable({
         searchPlaceholder: 'Digite sua pesquisa...',
     },
     ajax: {
-        url: '/empresas/listempresas',
+        url: '/empresa/listempresa',
         type: 'POST'
     }
 });
 async function Delete(id) {
     const formData = new FormData();
     formData.append('id', id);
-    
-    const response = await fetch('/empresas/delete', {
+
+    const response = await fetch('/empresa/delete', {
         method: 'POST',
         body: formData
     });
-    
+
     const data = await response.json();
-    
+
     if (!data.status) {
         Swal.fire({
             title: "Erro ao remover!",
@@ -56,3 +56,4 @@ async function Delete(id) {
     tabela.ajax.reload();
 }
 window.Delete = Delete;
+//DataTables.SetId('tabela').Post('/user/listuser');

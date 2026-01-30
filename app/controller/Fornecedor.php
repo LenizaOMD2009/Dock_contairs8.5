@@ -53,8 +53,7 @@ class Fornecedor extends Base
                 1 => 'nome_fantasia',
                 2 => 'sobrenome_razao',
                 3 => 'cpf_cnpj',
-                4 => 'rg_ie',
-                5 => 'data_nascimento_abertura'
+                4 => 'rg_ie'
             ];
             
             #Capturamos o nome do campo a ser ordenado.
@@ -62,24 +61,22 @@ class Fornecedor extends Base
             #O termo pesquisado
             $term = $form['search']['value'] ?? '';
             
-            $query = SelectQuery::select('id,nome_fantasia,sobrenome_razao,cpf_cnpj,rg_ie,data_nascimento_abertura')->from('fornecedor');
+            $query = SelectQuery::select('id,nome_fantasia,sobrenome_razao,cpf_cnpj,rg_ie')->from('supplier');
             
-            $queryTotal = SelectQuery::select('COUNT(*) as total')->from('fornecedor');
+            $queryTotal = SelectQuery::select('COUNT(*) as total')->from('supplier');
             $totalRecords = $queryTotal->fetch()['total'] ?? 0;
             
             if (!is_null($term) && ($term !== '')) {
-                $query->where('fornecedor.nome_fantasia', 'ilike', "%{$term}%", 'or')
-                    ->where('fornecedor.sobrenome_razao', 'ilike', "%{$term}%", 'or')
-                    ->where('fornecedor.cpf_cnpj', 'ilike', "%{$term}%", 'or')
-                    ->where('fornecedor.rg_ie', 'ilike', "%{$term}%", 'or')
-                    ->whereRaw("to_char(fornecedor.data_nascimento_abertura, 'YYYY-MM-DD') ILIKE '%{$term}%'");
+                $query->where('supplier.nome_fantasia', 'ilike', "%{$term}%", 'or')
+                    ->where('supplier.sobrenome_razao', 'ilike', "%{$term}%", 'or')
+                    ->where('supplier.cpf_cnpj', 'ilike', "%{$term}%", 'or')
+                    ->where('supplier.rg_ie', 'ilike', "%{$term}%");
 
-                $queryFiltered = SelectQuery::select('COUNT(*) as total')->from('fornecedor')
-                    ->where('fornecedor.nome_fantasia', 'ilike', "%{$term}%", 'or')
-                    ->where('fornecedor.sobrenome_razao', 'ilike', "%{$term}%", 'or')
-                    ->where('fornecedor.cpf_cnpj', 'ilike', "%{$term}%", 'or')
-                    ->where('fornecedor.rg_ie', 'ilike', "%{$term}%", 'or')
-                    ->whereRaw("to_char(fornecedor.data_nascimento_abertura, 'YYYY-MM-DD') ILIKE '%{$term}%'");
+                $queryFiltered = SelectQuery::select('COUNT(*) as total')->from('supplier')
+                    ->where('supplier.nome_fantasia', 'ilike', "%{$term}%", 'or')
+                    ->where('supplier.sobrenome_razao', 'ilike', "%{$term}%", 'or')
+                    ->where('supplier.cpf_cnpj', 'ilike', "%{$term}%", 'or')
+                    ->where('supplier.rg_ie', 'ilike', "%{$term}%");
                 $totalFiltered = $queryFiltered->fetch()['total'] ?? 0;
             } else {
                 $totalFiltered = $totalRecords;
@@ -98,7 +95,6 @@ class Fornecedor extends Base
                     $value['sobrenome_razao'],
                     $value['cpf_cnpj'],
                     $value['rg_ie'],
-                    $value['data_nascimento_abertura'],
                     "<a href='/fornecedor/alterar/{$value['id']}' class='btn btn-warning'>Editar</a>
                     <button type='button'  onclick='Delete(" . $value['id'] . ");' class='btn btn-danger'>Excluir</button>"
                 ];
@@ -133,13 +129,28 @@ class Fornecedor extends Base
     }
       public function alterar($request, $response, $args)
     {
-        $id = $args['id'];
-        $user = SelectQuery::select()->from('fornecedor')->where('id', '=', $id)->fetch();
+        $id = $args['id'] ?? null;
+        
+        // Validar se o ID é válido
+        if (!$id || !is_numeric($id)) {
+            $dadosTemplate = [
+                'acao' => 'c',
+                'id' => '',
+                'titulo' => 'Cadastro e alteracao de fornecedor',
+                'fornecedor' => null
+            ];
+            return $this->getTwig()
+                ->render($response, $this->setView('fornecedor'), $dadosTemplate)
+                ->withHeader('Content-Type', 'text/html')
+                ->withStatus(200);
+        }
+        
+        $fornecedor = SelectQuery::select()->from('supplier')->where('id', '=', $id)->fetch();
         $dadosTemplate = [
             'acao' => 'e',
             'id' => $id,
             'titulo' => 'Cadastro e alteracao de fornecedor',
-            'fornecedor' => $user
+            'fornecedor' => $fornecedor
         ];
         return $this->getTwig()
             ->render($response, $this->setView('fornecedor'), $dadosTemplate)
@@ -154,7 +165,7 @@ class Fornecedor extends Base
             // Primeiro, deleta registros relacionados em contato
             try {
                 DeleteQuery::table('contato')
-                    ->where('id_fornecedor', '=', $id)
+                    ->where('id_supplier', '=', $id)
                     ->delete();
             } catch (\Exception $e) {
                 // Log ou ignore se não houver registros
@@ -163,14 +174,14 @@ class Fornecedor extends Base
             // Depois, deleta registros relacionados em endereco
             try {
                 DeleteQuery::table('endereco')
-                    ->where('id_fornecedor', '=', $id)
+                    ->where('id_supplier', '=', $id)
                     ->delete();
             } catch (\Exception $e) {
                 // Log ou ignore se não houver registros
             }
 
             // Finalmente, deleta o usuário
-            $IsDelete = DeleteQuery::table('fornecedor')
+            $IsDelete = DeleteQuery::table('supplier')
                 ->where('id', '=', $id)
                 ->delete();
 
@@ -196,10 +207,9 @@ class Fornecedor extends Base
                 'nome_fantasia' => $form['nome_fantasia'],
                 'sobrenome_razao' => $form['sobrenome_razao'],
                 'cpf_cnpj' => $form['cpf_cnpj'],
-                'rg_ie' => $form['rg_ie'],
-                'data_nascimento_abertura' => $form['data_nascimento_abertura']
+                'rg_ie' => $form['rg_ie']
             ];
-            $IsUpdate = UpdateQuery::table('fornecedor')->set($FieldAndValues)->where('id', '=', $id)->update();
+            $IsUpdate = UpdateQuery::table('supplier')->set($FieldAndValues)->where('id', '=', $id)->update();
             if (!$IsUpdate) {
                 $data = [
                     'status' => false,
@@ -227,17 +237,16 @@ class Fornecedor extends Base
                 'nome_fantasia' => $form['nome_fantasia'] ?? null,
                 'sobrenome_razao' => $form['sobrenome_razao'] ?? null,
                 'cpf_cnpj' => $form['cpf_cnpj'] ?? null,
-                'rg_ie' => $form['rg_ie'] ?? null,
-                'data_nascimento_abertura' => $form['data_nascimento_abertura'] ?? null
+                'rg_ie' => $form['rg_ie'] ?? null
             ];
-            $IsSave = InsertQuery::table('fornecedor')->save($FieldsAndValues);
+            $IsSave = InsertQuery::table('supplier')->save($FieldsAndValues);
 
             if (!$IsSave) {
                 $data = ['status' => false, 'msg' => 'Erro ao inserir fornecedor', 'id' => 0];
                 return $this->SendJson($response, $data, 200);
             }
             
-            $id = SelectQuery::select('id')->from('fornecedor')->order('id', 'desc')->fetch();
+            $id = SelectQuery::select('id')->from('supplier')->order('id', 'desc')->fetch();
             $data = [
                 'status' => true,
                 'msg' => 'fornecedor cadastrado com sucesso!',

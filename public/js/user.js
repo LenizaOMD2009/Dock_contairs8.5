@@ -108,7 +108,7 @@ async function update() {
         },
         willClose: () => {
             //Redireciona automaticamente para a lista de usuários
-            //window.location.href = '/usuario/lista';
+            window.location.href = '/usuario/lista';
         }
     });
 }

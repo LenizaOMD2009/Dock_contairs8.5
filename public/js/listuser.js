@@ -59,4 +59,4 @@ async function Delete(id) {
     tabela.ajax.reload();
 }
 window.Delete = Delete;
-//DataTables.SetId('tabela').Post('/user/listuser');
+DataTables.SetId('tabela').Post('/user/listuser');

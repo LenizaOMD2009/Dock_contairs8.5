@@ -6,7 +6,7 @@ use app\database\builder\DeleteQuery;
 use app\database\builder\InsertQuery;
 use app\database\builder\SelectQuery;
 use app\database\builder\UpdateQuery;
-use EmptyIterator;
+
 
 class User extends Base
 {
@@ -34,13 +34,28 @@ class User extends Base
     }
     public function alterar($request, $response, $args)
     {
-        $id = $args['id'];
-        $user = SelectQuery::select()->from('users')->where('id', '=', $id)->fetch();
+        $id = $args['id'] ?? null;
+        
+        // Validar se o ID é válido
+        if (!$id || !is_numeric($id)) {
+            $dadosTemplate = [
+                'acao' => 'c',
+                'id' => '',
+                'titulo' => 'Cadastro e alteracao de usuário',
+                'usuario' => null
+            ];
+            return $this->getTwig()
+                ->render($response, $this->setView('user'), $dadosTemplate)
+                ->withHeader('Content-Type', 'text/html')
+                ->withStatus(200);
+        }
+        
+        $usuario = SelectQuery::select()->from('users')->where('id', '=', $id)->fetch();
         $dadosTemplate = [
             'acao' => 'e',
             'id' => $id,
             'titulo' => 'Cadastro e alteracao de usuário',
-            'users' => $user
+            'usuario' => $usuario
         ];
         return $this->getTwig()
             ->render($response, $this->setView('user'), $dadosTemplate)
@@ -93,7 +108,7 @@ class User extends Base
                 $value['sobrenome'],
                 $value['cpf'],
                 $value['rg'],
-                "<a href='/users/alterar/{$value['id']}' class='btn btn-warning'>Editar</a>
+                "<a href='/usuario/alterar/{$value['id']}' class='btn btn-warning'>Editar</a>
                  <button type='button'  onclick='Delete(" . $value['id'] . ");' class='btn btn-danger'>Excluir</button>"
             ];
         }
@@ -129,7 +144,7 @@ class User extends Base
             if (!$IsInsert) {
                 $data = [
                     'status' => false,
-                    'msg' => 'Restrição: ' . $$IsInsert,
+                    'msg' => 'Erro ao inserir usuário',
                     'id' => 0
                 ];
                 $payload = json_encode($data);
@@ -151,6 +166,8 @@ class User extends Base
                 ->withHeader('Content-Type', 'application/json')
                 ->withStatus(200);
         } catch (\Exception $e) {
+            $data = ['status' => false, 'msg' => 'Erro: ' . $e->getMessage(), 'id' => 0];
+            return $this->SendJson($response, $data, 500);
         }
     }
     public function delete($request, $response)
@@ -211,7 +228,7 @@ class User extends Base
             if (!$IsUpdate) {
                 $data = [
                     'status' => false,
-                    'msg' => 'Restrição: ' . $$IsUpdate,
+                    'msg' => 'Erro ao atualizar usuário',
                     'id' => 0
                 ];
                 $payload = json_encode($data);
@@ -231,6 +248,8 @@ class User extends Base
                 ->withHeader('Content-Type', 'application/json')
                 ->withStatus(200);
         } catch (\Exception $e) {
+            $data = ['status' => false, 'msg' => 'Erro: ' . $e->getMessage(), 'id' => 0];
+            return $this->SendJson($response, $data, 500);
         }
     }
 }

@@ -30,23 +30,23 @@
                     <div class="col-md-4">
                         <label for="nome" class="form-label">Nome</label>
                         <input type="text" class="form-control" id="nome" name="nome" placeholder="Digite seu nome."
-                            required autofocus value="{{usuario.nome}}">
+                            required autofocus value="{{usuario ? usuario.nome : ''}}">
                     </div>
                     <div class="col-md-4">
                         <label for="sobrenome" class="form-label">Sobre nome</label>
                         <input type="text" class="form-control" id="sobrenome" name="sobrenome"
-                            placeholder="Por favor digite seu sobre nome" required value="{{usuario.sobrenome}}">
+                            placeholder="Por favor digite seu sobre nome" required value="{{usuario ? usuario.sobrenome : ''}}">
                     </div>
                     <div class="col-md-4">
                         <label for="cpf" class="form-label">CPF</label>
                         <input type="text" class="form-control" id="cpf" name="cpf"
-                            placeholder="Por favor digite seu CPF" value="{{usuario.cpf}}">
+                            placeholder="Por favor digite seu CPF" value="{{usuario ? usuario.cpf : ''}}">
                         <small class="form-text text-muted">Digite um CPF (000.000.000-00)</small>
                     </div>
                     <div class="col-md-4">
                         <label for="rg" class="form-label">RG</label>
                         <input type="text" class="form-control" id="rg" name="rg" placeholder="Por favor digite seu RG"
-                            required data-rule-rg="true" value="{{usuario.rg}}">
+                            required data-rule-rg="true" value="{{usuario ? usuario.rg : ''}}">
                     </div>
                     <div class="col-md-4" id="campo_senha">
                         <label for="senha" class="form-label">Senha</label>
