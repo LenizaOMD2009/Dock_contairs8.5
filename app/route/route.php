@@ -4,12 +4,14 @@ use app\controller\User;
 use app\controller\cliente;
 use app\controller\Empresa;
 use app\controller\Home;
+use app\controller\Sale;
+use app\controller\PaymentTerms;
 use app\controller\Fornecedor;
 use app\controller\Login;
 use app\middleware\Auth;
 use Slim\Routing\RouteCollectorProxy;
 
-$app->get('/', Home::class . ':home')->add(Auth::route());
+$app->get('/', Home::class . ':home');
 $app->get('/home', Home::class . ':home');
 $app->get('/login', Login::class . ':login');
 
@@ -19,6 +21,11 @@ $app->group('/login', function (RouteCollectorProxy $group) {
     $group->post('/recuperar', Login::class . ':recuperar');
     $group->post('/verificarCodigo', Login::class . ':verificarCodigo');
     $group->post('/atualizarSenha', Login::class . ':atualizarSenha');
+});
+
+$app->group('/venda', function (RouteCollectorProxy $group) {
+    $group->get('/lista', Sale::class . ':lista');
+    $group->get('/cadastro', Sale::class . ':cadastro');
 });
 
 $app->group('/usuario', function (RouteCollectorProxy $group) {
@@ -57,4 +64,8 @@ $app->group('/fornecedor', function (RouteCollectorProxy $group) {
     $group->post('/insert', Fornecedor::class . ':insert');
     $group->get('/alterar/{id}', Fornecedor::class . ':alterar'); #->add(Auth::route());
     $group->post('/delete', Fornecedor::class . ':delete');
+});
+$app->group('/pagamento', function (RouteCollectorProxy $group) {
+    $group->get('/lista', PaymentTerms::class . ':lista');
+    $group->get('/cadastro', PaymentTerms::class . ':cadastro');
 });

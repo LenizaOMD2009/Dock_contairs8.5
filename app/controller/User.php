@@ -252,4 +252,11 @@ class User extends Base
             return $this->SendJson($response, $data, 500);
         }
     }
+        public function print($request, $response)
+    {
+        $html = $this->getHtml('reportuser.html');
+        return $this->printer($html);
+    }
 }
+
+
