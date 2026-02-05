@@ -4,8 +4,9 @@ use app\controller\User;
 use app\controller\cliente;
 use app\controller\Empresa;
 use app\controller\Home;
-use app\controller\Sale;
 use app\controller\PaymentTerms;
+use app\controller\Sale;
+use app\controller\Produto;
 use app\controller\Fornecedor;
 use app\controller\Login;
 use app\middleware\Auth;
@@ -47,6 +48,16 @@ $app->group('/cliente', function (RouteCollectorProxy $group) {
     $group->get('/alterar/{id}', cliente::class . ':alterar'); #->add(Auth::route());
     $group->post('/delete', cliente::class . ':delete');
 });
+$app->group('/produto', function (RouteCollectorProxy $group) {
+    $group->get('/lista', app\controller\Produto::class . ':lista'); #->add(Auth::route());
+    $group->get('/cadastro', app\controller\Produto::class . ':cadastro'); #->add(Auth::route());
+    $group->post('/listproduto', app\controller\Produto::class . ':listproduto');
+    $group->post('/update', app\controller\Produto::class . ':update');
+    $group->post('/insert', app\controller\Produto::class . ':insert');
+    $group->get('/alterar/{id}', app\controller\Produto::class . ':alterar'); #->add(Auth::route());
+    $group->post('/delete', app\controller\Produto::class . ':delete');
+});
+
 $app->group('/empresa', function (RouteCollectorProxy $group) {
     $group->get('/lista', Empresa::class . ':lista'); #->add(Auth::route());
     $group->get('/cadastro', Empresa::class . ':cadastro'); #->add(Auth::route());
