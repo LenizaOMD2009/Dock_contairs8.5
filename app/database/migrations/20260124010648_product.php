@@ -19,7 +19,7 @@ final class Product extends AbstractMigration
             ->addColumn('preco_custo', 'decimal', ['precision' => 12, 'scale' => 2, 'null' => false])
             ->addColumn('preco_venda', 'decimal', ['precision' => 12, 'scale' => 2, 'null' => false])
             ->addColumn('ativo', 'boolean', ['default' => true, 'null' => false])
-            ->addColumn('excluido', 'boolean', ['default' => false, 'null' => false])
+            ->addColumn('excluido', 'boolean', ['default' => false, 'null' => true])
             ->addColumn('data_cadastro', 'datetime', ['null' => true, 'default' => 'CURRENT_TIMESTAMP'])
             ->addColumn('data_atualizacao', 'datetime', ['null' => true, 'default' => 'CURRENT_TIMESTAMP'])
 

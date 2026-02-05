@@ -57,16 +57,18 @@ $suppliers = SelectQuery::select('id,nome_fantasia')
             $fields = [
                 0 => 'id',
                 1 => 'nome',
-                2 => 'descricao_curta',
-                3 => 'preco_custo',
-                4 => 'preco_venda'
+                2 => 'codigo_barras',
+                3 => 'descricao_curta',
+                4 => 'supplier_id',
+                5 => 'preco_custo',
+                6 => 'preco_venda'
             ];
 
             $orderField = $fields[$order] ?? 'id';
             $term = $form['search']['value'] ?? '';
 
             $query = SelectQuery::select(
-                'id,nome,descricao_curta,preco_custo,preco_venda'
+  
             )
                 ->from('product')
                 ->where('excluido', '=', false);
@@ -102,7 +104,9 @@ $suppliers = SelectQuery::select('id,nome_fantasia')
                 $dataRows[$key] = [
                     $value['id'],
                     $value['nome'],
+                    $value['codigo_barras'],
                     $value['descricao_curta'],
+                    $value['supplier_id'],
                     $value['preco_custo'],
                     $value['preco_venda'],
                     "<a href='/produto/alterar/{$value['id']}' class='btn btn-warning'>Editar</a>
@@ -171,7 +175,8 @@ $suppliers = SelectQuery::select('id,nome_fantasia')
             'id' => $id,
             'titulo' => 'Cadastro e alteração de produto',
             'produto' => $produto,
-            'suppliers' => $suppliers
+            'suppliers' => $suppliers,
+            'isExcluido' => $produto['excluido'] ?? false
         ];
 
 
@@ -228,6 +233,7 @@ $suppliers = SelectQuery::select('id,nome_fantasia')
                 'preco_custo' => $form['preco_custo'],
                 'preco_venda' => $form['preco_venda'],
                 'ativo' => isset($form['ativo']),
+                'excluido' => isset($form['excluido']),
                 'data_atualizacao' => date('Y-m-d H:i:s')
             ];
 

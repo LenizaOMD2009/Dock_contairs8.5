@@ -100,7 +100,17 @@
                                                 <th>Ação</th>
                                             </tr>
                                         </thead>
-                                        <tbody></tbody>
+                                        <tbody>
+                                            <tr>
+                                                <td>1</td>
+                                                <td>1 X</td>
+                                                <td>30 (Dias)</td>
+                                                <td>5 (Dias)</td>
+                                                <td>
+                                                    <button class="btn btn-danger">Excluir</button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
                                     </table>
                                 </div>
                             </div>
@@ -118,5 +128,5 @@
 
 {% block script %}
 {% include 'script.html' %}
-<script src="/js/paymentterms.js"></script>
+<script defer type="module" src="/js/paymentterms.js"></script>
 {% endblock %}
