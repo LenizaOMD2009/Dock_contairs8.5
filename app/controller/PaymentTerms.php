@@ -4,6 +4,7 @@ namespace app\controller;
 
 use app\database\builder\InsertQuery;
 use app\database\builder\SelectQuery;
+use app\database\builder\UpdateQuery;
 
 class PaymentTerms extends Base
 {
@@ -32,10 +33,20 @@ class PaymentTerms extends Base
     public function alterar($request, $response, $args)
     {
         $id = $args['id'];
+        $paymentTerms = SelectQuery::select()
+       ->from ('payment_terms')
+         ->where('id', '=', $id)
+            ->fetch();
+
+        if (!$paymentTerms) {
+        return header('Location: /pagamento/lista');
+        die;
+        }
         $templaData = [
             'titulo' => 'Alteração de termos de pagamento',
             'acao' => 'e',
             'id' => $id,
+            'paymentTerms' => $paymentTerms
         ];
         return $this->getTwig()
             ->render($response, $this->setView('paymentterms'), $templaData)
@@ -73,6 +84,27 @@ class PaymentTerms extends Base
             return $this->SendJson($response, ['status' => false, 'msg' => 'Restrição: ' . $e->getMessage(), 'id' => 0], 500);
         }
     }
+    public function update($request, $response)
+    {
+        #Captura os dados do front-end.
+        $form = $request->getParsedBody();
+        $id = $form['id'];
+        if (is_null($id) || $id == '' || empty($id)) {
+            return $this->SendJson($response, ['status' => false, 'msg' => 'ID do termo de pagamento não informado para alteração.', 'id' => 0], 403);
+        }
+        $FieldAndValues = [
+            'codigo' => $form['codigo'],
+            'titulo' => $form['titulo']
+        ];
+        $IsUpdate = UpdateQuery::table('payment_terms')
+            ->set($FieldAndValues)
+            ->where('id', '=', $id)
+            ->update();
+        if (!$IsUpdate) {
+            return $this->SendJson($response, ['status' => false, 'msg' => 'Restrição: ' . $IsUpdate, 'id' => 0], 500);
+        }
+        return $this->SendJson($response, ['status' => true, 'msg' => 'Alteração realizada com sucesso!', 'id' => $id], 200);
+    }
     public function insertInstallment($request, $response)
     {
         #Captura os dados do front-end.
@@ -101,5 +133,19 @@ class PaymentTerms extends Base
         ];
         #Retorno de teste.
         return $this->SendJson($response, $dataResponse, 201);
+    }
+    public function loaddataInstallments($request, $response)
+    {
+        $form = $request->getParsedBody();
+        $idPaymentTerms = $form['id'];
+        try{
+            $installments = SelectQuery::select()
+                ->from('installment')
+                ->where('id_pagamento', '=', $idPaymentTerms)
+                ->fetchAll();
+            return $this->SendJson($response, ['status' => true, 'data' => $installments]);
+        } catch (\Exception $e) {
+            return $this->SendJson($response, ['status' => false, 'msg' => 'Restrição: ' . $e->getMessage()], 500);
+        }
     }
 }

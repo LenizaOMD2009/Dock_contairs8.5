@@ -25,9 +25,9 @@ class Produto extends Base
     public function cadastro($request, $response)
     {
         // Buscar fornecedores ativos
-$suppliers = SelectQuery::select('id,nome_fantasia')
-    ->from('supplier')
-    ->fetchAll();
+        $suppliers = SelectQuery::select('id,nome_fantasia')
+            ->from('supplier')
+            ->fetchAll();
 
 
         $dadosTemplate = [
@@ -67,9 +67,7 @@ $suppliers = SelectQuery::select('id,nome_fantasia')
             $orderField = $fields[$order] ?? 'id';
             $term = $form['search']['value'] ?? '';
 
-            $query = SelectQuery::select(
-  
-            )
+            $query = SelectQuery::select()
                 ->from('product')
                 ->where('excluido', '=', false);
 
@@ -164,10 +162,10 @@ $suppliers = SelectQuery::select('id,nome_fantasia')
             ->where('id', '=', $id)
             ->fetch();
 
-$suppliers = SelectQuery::select('id,nome_fantasia')
-    ->from('supplier')
-    ->whereRaw('(ativo = true OR ativo IS NULL)')
-    ->fetchAll();
+        $suppliers = SelectQuery::select('id,nome_fantasia')
+            ->from('supplier')
+            ->whereRaw('(ativo = true OR ativo IS NULL)')
+            ->fetchAll();
 
 
         $dadosTemplate = [
@@ -272,12 +270,13 @@ $suppliers = SelectQuery::select('id,nome_fantasia')
             $FieldsAndValues = [
                 'supplier_id' => $form['supplier_id'],
                 'nome' => $form['nome'],
-                'codigo_barras' => $form['codigo_barras'] ,
+                'codigo_barras' => $form['codigo_barras'],
                 'descricao_curta' => $form['descricao_curta'],
                 'descricao' => $form['descricao'],
                 'preco_custo' => $form['preco_custo'],
                 'preco_venda' => $form['preco_venda'],
-                'ativo' => ($form['ativo'] )
+                'ativo' => ($form['ativo']),
+                'excluido' => ($form['excluido'])
             ];
 
             $IsSave = InsertQuery::table('product')->save($FieldsAndValues);

@@ -23,6 +23,21 @@ async function insertPaymentTerms() {
             });
             return;
         }
+        if (Action.value === 'e') {
+            Swal.fire({
+            icon: "success",
+            title: "Sucesso",
+            text: response.msg,
+            timer: 2000,
+            timerProgressBar: true,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+            }).then(() => {
+                window.location.reload();
+            });
+            return;
+        }
         Action.value = 'e';
         //Seta o ID retornado do back-end.
         Id.value = response.id;
@@ -42,9 +57,7 @@ async function insertPaymentTerms() {
             didOpen: () => {
                 Swal.showLoading();
             }
-        }).then((result) => {
-
-        });
+          });
     } catch (error) {
         console.log(error)
     }
@@ -88,18 +101,15 @@ async function insertInstallment() {
 
 async function loadDataInstallments() {
     try {
-        [
-            {
-                parcels: 1,
-                intervalor: 30,
-                alterar_vencimento_conta: '0'
-            },
-            {
-                parcels: 2,
-                intervalor: 30,
-                alterar_vencimento_conta: '0'
-            }
-        ]
+        if (Action.value === 'c') {
+        document.getElementById('tbInstallments').innerHTML = '';
+        document.getElementById('tbInstallments').innerHTML = `
+            <tr>
+                <td colspan="5">Nenhuma parcela cadastrada</td>
+            </tr>
+        `;
+            return;
+        }
         const response = await Requests.SetForm('form').Post('/pagamento/loaddatainstallments');
         //Variavel para guardar os dados da linha da tabela de parcelamento.
         let trs = '';
@@ -116,10 +126,36 @@ async function loadDataInstallments() {
             </tr>
             `;
         });
+        document.getElementById('tbInstallments').innerHTML = '';
+        document.getElementById('tbInstallments').innerHTML = trs;
     } catch (error) {
         console.log(error)
     }
 }
+
+async function deleteInstallment(id) {
+    window.getElementById(id_parcelamento).value = id;
+    try {
+        const response = await Requests.SetForm('form').Post('/pagamento/deleteinstallment');
+        if (!response.status) {
+            Swal.fire({
+                icon: "error",
+                title: "Restrição",
+                text: response.msg,
+                timer: 2000,
+                timerProgressBar: true,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            return;
+        }
+        document.getElementById(`trinstallment${id}`).remove();
+    } catch (error) {
+        console.log(error)
+    }
+}
+
 
 insertPaymentTermsButton.addEventListener('click', async () => {
     await insertPaymentTerms();
@@ -127,3 +163,5 @@ insertPaymentTermsButton.addEventListener('click', async () => {
 insertInstallmentButton.addEventListener('click', async () => {
     await insertInstallment();
 });
+window.deleteInstallment = deleteInstallment;
+await loadDataInstallments();
