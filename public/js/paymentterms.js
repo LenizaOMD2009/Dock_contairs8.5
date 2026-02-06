@@ -25,16 +25,16 @@ async function insertPaymentTerms() {
         }
         if (Action.value === 'e') {
             Swal.fire({
-            icon: "success",
-            title: "Sucesso",
-            text: response.msg,
-            timer: 2000,
-            timerProgressBar: true,
-            didOpen: () => {
-                Swal.showLoading();
-            }
+                icon: "success",
+                title: "Sucesso",
+                text: response.msg,
+                timer: 2000,
+                timerProgressBar: true,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
             }).then(() => {
-                window.location.reload();
+                window.location.replace('/pagamento/lista');
             });
             return;
         }
@@ -57,7 +57,7 @@ async function insertPaymentTerms() {
             didOpen: () => {
                 Swal.showLoading();
             }
-          });
+        });
     } catch (error) {
         console.log(error)
     }
@@ -82,18 +82,7 @@ async function insertInstallment() {
             });
             return;
         }
-        Swal.fire({
-            icon: "success",
-            title: "Sucesso",
-            text: response.msg,
-            timer: 2000,
-            timerProgressBar: true,
-            didOpen: () => {
-                Swal.showLoading();
-            }
-        }).then((result) => {
-            //Carrega os dados do parcelamento da condição de pagamento.
-        });
+        await loadDataInstallments();
     } catch (error) {
         console.log(error)
     }
@@ -102,12 +91,12 @@ async function insertInstallment() {
 async function loadDataInstallments() {
     try {
         if (Action.value === 'c') {
-        document.getElementById('tbInstallments').innerHTML = '';
-        document.getElementById('tbInstallments').innerHTML = `
-            <tr>
-                <td colspan="5">Nenhuma parcela cadastrada</td>
-            </tr>
-        `;
+            document.getElementById('tbInstallments').innerHTML = '';
+            document.getElementById('tbInstallments').innerHTML = `
+                <tr>
+                    <td class="text-center" colspan="5">Nenhuma parcela cadastrada</td>
+                </tr>
+            `;
             return;
         }
         const response = await Requests.SetForm('form').Post('/pagamento/loaddatainstallments');
@@ -121,7 +110,7 @@ async function loadDataInstallments() {
                 <td>${item.intervalor} (Dias)</td>
                 <td>${item.alterar_vencimento_conta} (Dias)</td>
                 <td>
-                    <button class="btn btn-danger" onclick="deleteInstallment(${item.id})">Excluir</button>
+                    <button type="button" class="btn btn-danger" onclick="deleteInstallment(${item.id})">Excluir</button>
                 </td>
             </tr>
             `;
@@ -134,7 +123,7 @@ async function loadDataInstallments() {
 }
 
 async function deleteInstallment(id) {
-    window.getElementById(id_parcelamento).value = id;
+    document.getElementById('id_parcelamento').value = id;
     try {
         const response = await Requests.SetForm('form').Post('/pagamento/deleteinstallment');
         if (!response.status) {
@@ -142,7 +131,7 @@ async function deleteInstallment(id) {
                 icon: "error",
                 title: "Restrição",
                 text: response.msg,
-                timer: 2000,
+                timer: 3000,
                 timerProgressBar: true,
                 didOpen: () => {
                     Swal.showLoading();
@@ -152,10 +141,9 @@ async function deleteInstallment(id) {
         }
         document.getElementById(`trinstallment${id}`).remove();
     } catch (error) {
-        console.log(error)
+        console.log(error);
     }
 }
-
 
 insertPaymentTermsButton.addEventListener('click', async () => {
     await insertPaymentTerms();
@@ -164,4 +152,5 @@ insertInstallmentButton.addEventListener('click', async () => {
     await insertInstallment();
 });
 window.deleteInstallment = deleteInstallment;
+//Sempre que a pagina for carregada, carrega os dados das parcelas.
 await loadDataInstallments();

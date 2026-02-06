@@ -76,12 +76,13 @@ $app->group('/fornecedor', function (RouteCollectorProxy $group) {
     $group->get('/alterar/{id}', Fornecedor::class . ':alterar'); #->add(Auth::route());
     $group->post('/delete', Fornecedor::class . ':delete');
 });
-$app->group('/PaymentTerms', function (RouteCollectorProxy $group) {
+$app->group('/pagamento', function (RouteCollectorProxy $group) {
     $group->get('/lista', PaymentTerms::class . ':lista');
     $group->get('/cadastro', PaymentTerms::class . ':cadastro');
     $group->get('/alterar/{id}', PaymentTerms::class . ':alterar');
+    $group->post('/insert', PaymentTerms::class . ':insert');
     $group->post('/update', PaymentTerms::class . ':update');
-    $group->post('/insertInstallment', PaymentTerms::class . ':insertInstallment');
-    $group->post('/loaddataInstallments', PaymentTerms::class . ':loaddataInstallments');
-    $group->post('/deleteInstallment', PaymentTerms::class . ':deleteInstallment');
-    });
+    $group->post('/insertinstallment', PaymentTerms::class . ':insertInstallment');
+    $group->post('/loaddatainstallments', PaymentTerms::class . ':loaddatainstallments');
+    $group->post('/deleteinstallment', PaymentTerms::class . ':deleteinstallment');
+});
