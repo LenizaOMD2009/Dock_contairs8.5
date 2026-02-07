@@ -6,11 +6,10 @@ use app\controller\Empresa;
 use app\controller\Home;
 use app\controller\PaymentTerms;
 use app\controller\Sale;
-use app\controller\Produto;
 use app\controller\Fornecedor;
 use app\controller\Login;
-use app\middleware\Auth;
 use Slim\Routing\RouteCollectorProxy;
+
 
 $app->get('/', Home::class . ':home');
 $app->get('/home', Home::class . ':home');
@@ -85,4 +84,5 @@ $app->group('/pagamento', function (RouteCollectorProxy $group) {
     $group->post('/insertinstallment', PaymentTerms::class . ':insertInstallment');
     $group->post('/loaddatainstallments', PaymentTerms::class . ':loaddatainstallments');
     $group->post('/deleteinstallment', PaymentTerms::class . ':deleteinstallment');
+    $group->post('/listaPaymentTerms', PaymentTerms::class . ':listaPaymentTerms');
 });
