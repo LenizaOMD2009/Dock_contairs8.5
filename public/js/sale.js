@@ -34,68 +34,6 @@ function updateClock() {
 setInterval(updateClock, 1000);
 updateClock();
 
-// Gerenciamento do carrinho
-let cart = [];
-let paymentMethod = 'dinheiro';
-let discount = { type: 'valor', amount: 0 };
-
-// Adicionar produto ao carrinho
-function addToCart(code, description, price) {
-    const existingItem = cart.find(item => item.code === code);
-
-    if (existingItem) {
-        existingItem.quantity += 1;
-    } else {
-        cart.push({
-            code: code,
-            description: description,
-            price: price,
-            quantity: 1
-        });
-    }
-
-    updateCart();
-}
-
-// Atualizar visualização do carrinho
-function updateCart() {
-    const cartEmpty = document.querySelector('.cart-empty');
-
-    if (cart.length === 0) {
-        cartEmpty.style.display = 'block';
-    } else {
-        cartEmpty.style.display = 'none';
-        // Aqui você pode adicionar a lógica para mostrar os itens do carrinho
-    }
-
-    updateTotals();
-}
-
-// Calcular e atualizar totais
-function updateTotals() {
-    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
-    let discountAmount = 0;
-    if (discount.type === 'valor') {
-        discountAmount = discount.amount;
-    } else {
-        discountAmount = (subtotal * discount.amount) / 100;
-    }
-
-    const total = subtotal - discountAmount;
-
-    const subtotalElement = document.querySelector('.subtotal .amount');
-    const totalElement = document.querySelector('.total-amount');
-
-    if (subtotalElement) {
-        subtotalElement.textContent = `R$ ${subtotal.toFixed(2).replace('.', ',')}`;
-    }
-
-    if (totalElement) {
-        totalElement.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
-    }
-}
-
 // Event Listeners para botões de adicionar
 document.addEventListener('DOMContentLoaded', function () {
     // Botões de adicionar produto
@@ -220,48 +158,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-// Filtrar produtos na tabela
-function filterProducts(searchTerm) {
-    const rows = document.querySelectorAll('.products-table tbody tr');
-    let visibleCount = 0;
-
-    rows.forEach(row => {
-        const code = row.cells[0].textContent.toLowerCase();
-        const description = row.cells[1].textContent.toLowerCase();
-
-        if (code.includes(searchTerm) || description.includes(searchTerm)) {
-            row.style.display = '';
-            visibleCount++;
-        } else {
-            row.style.display = 'none';
-        }
-    });
-
-    // Atualizar contador de produtos
-    const productCount = document.querySelector('.product-count');
-    if (productCount) {
-        productCount.textContent = `${visibleCount} produtos`;
-    }
-}
-
-// Atualizar estilos dos inputs de desconto
-function updateInputStyles() {
-    const inputRs = document.querySelector('.discount-input-rs');
-    const inputPercent = document.querySelector('.discount-input-percent');
-
-    if (discount.type === 'valor') {
-        inputRs.style.borderColor = 'var(--primary-blue)';
-        inputRs.style.background = 'var(--white)';
-        inputPercent.style.borderColor = 'var(--gray-300)';
-        inputPercent.style.background = 'var(--gray-50)';
-    } else {
-        inputPercent.style.borderColor = 'var(--primary-blue)';
-        inputPercent.style.background = 'var(--white)';
-        inputRs.style.borderColor = 'var(--gray-300)';
-        inputRs.style.background = 'var(--gray-50)';
-    }
-}
-
 // Atalhos de teclado
 document.addEventListener('keydown', function (e) {
     // F2 - Focar no campo de busca
@@ -281,13 +177,30 @@ document.addEventListener('keydown', function (e) {
         e.preventDefault();
         document.querySelector('.btn-cancel')?.click();
     }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'F8') {
+            alert('Tecla F8 pressionada!');
+        }
+    });
+
+    // Feedback visual para cliques
+    document.addEventListener('click', function (e) {
+        if (e.target.matches('button')) {
+            e.target.style.transition = 'transform 0.1s';
+        }
+    });
+
 });
 
-// Feedback visual para cliques
-document.addEventListener('click', function (e) {
-    if (e.target.matches('button')) {
-        e.target.style.transition = 'transform 0.1s';
+$("#pesquisa").select2({
+    theme: 'bootstrap-5',
+    placeholder: "selecione um produto",
+    ajax: {
+        url: '/produto/listprodutcdata',
+        type: 'POST',
+        delay: 250,
     }
 });
 
-console.log('Sistema de Vendas - Carregado com sucesso!');
+

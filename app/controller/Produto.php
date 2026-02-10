@@ -7,7 +7,7 @@ use app\database\builder\SelectQuery;
 use app\database\builder\InsertQuery;
 use app\database\builder\UpdateQuery;
 
-class Produto extends Base
+class Product extends Base
 {
 
     public function lista($request, $response)
@@ -17,11 +17,10 @@ class Produto extends Base
         ];
 
         return $this->getTwig()
-            ->render($response, $this->setView('listproduto'), $dadosTemplate)
+            ->render($response, $this->setView('listproduct'), $dadosTemplate)
             ->withHeader('Content-Type', 'text/html')
             ->withStatus(200);
     }
-
     public function cadastro($request, $response)
     {
         // Buscar fornecedores ativos
@@ -34,109 +33,25 @@ class Produto extends Base
             'titulo' => 'Cadastro de produto',
             'acao' => 'c',
             'id' => '',
-            'produto' => [],
+            'product' => [],
             'suppliers' => $suppliers // <-- enviar para o template
         ];
 
         return $this->getTwig()
-            ->render($response, $this->setView('produto'), $dadosTemplate)
+            ->render($response, $this->setView('product'), $dadosTemplate)
             ->withHeader('Content-Type', 'text/html')
             ->withStatus(200);
     }
-
-    public function listproduto($request, $response)
+    public function listproductdata($request, $response)
     {
-        try {
-            $form = $request->getParsedBody();
-
-            $order = $form['order'][0]['column'] ?? 0;
-            $orderType = $form['order'][0]['dir'] ?? 'asc';
-            $start = $form['start'] ?? 0;
-            $length = $form['length'] ?? 10;
-
-            $fields = [
-                0 => 'id',
-                1 => 'nome',
-                2 => 'codigo_barras',
-                3 => 'descricao_curta',
-                4 => 'supplier_id',
-                5 => 'preco_custo',
-                6 => 'preco_venda'
-            ];
-
-            $orderField = $fields[$order] ?? 'id';
-            $term = $form['search']['value'] ?? '';
-
-            $query = SelectQuery::select()
-                ->from('product')
-                ->where('excluido', '=', false);
-
-            $queryTotal = SelectQuery::select('COUNT(*) as total')
-                ->from('product')
-                ->where('excluido', '=', false);
-
-            $totalRecords = $queryTotal->fetch()['total'] ?? 0;
-
-            if (!is_null($term) && $term !== '') {
-                $query->where('product.nome', 'ilike', "%{$term}%", 'or')
-                    ->where('product.descricao_curta', 'ilike', "%{$term}%");
-
-                $queryFiltered = SelectQuery::select('COUNT(*) as total')
-                    ->from('product')
-                    ->where('excluido', '=', false)
-                    ->where('product.nome', 'ilike', "%{$term}%", 'or')
-                    ->where('product.descricao_curta', 'ilike', "%{$term}%");
-
-                $totalFiltered = $queryFiltered->fetch()['total'] ?? 0;
-            } else {
-                $totalFiltered = $totalRecords;
-            }
-
-            $produtos = $query
-                ->order($orderField, $orderType)
-                ->limit($length, $start)
-                ->fetchAll();
-
-            $dataRows = [];
-            foreach ($produtos as $key => $value) {
-                $dataRows[$key] = [
-                    $value['id'],
-                    $value['nome'],
-                    $value['codigo_barras'],
-                    $value['descricao_curta'],
-                    $value['supplier_id'],
-                    $value['preco_custo'],
-                    $value['preco_venda'],
-                    "<a href='/produto/alterar/{$value['id']}' class='btn btn-warning'>Editar</a>
-                     <button type='button' onclick='Delete(" . $value['id'] . ");' class='btn btn-danger'>Excluir</button>"
-                ];
-            }
-
-            $data = [
-                'draw' => $form['draw'] ?? 1,
-                'recordsTotal' => $totalRecords,
-                'recordsFiltered' => $totalFiltered,
-                'data' => $dataRows
-            ];
-
-            $response->getBody()->write(json_encode($data));
-
-            return $response
-                ->withHeader('Content-Type', 'application/json')
-                ->withStatus(200);
-        } catch (\Throwable $th) {
-            $response->getBody()->write(json_encode([
-                'draw' => $form['draw'] ?? 1,
-                'recordsTotal' => 0,
-                'recordsFiltered' => 0,
-                'data' => [],
-                'error' => $th->getMessage()
-            ]));
-
-            return $response
-                ->withHeader('Content-Type', 'application/json')
-                ->withStatus(200);
+        $form = $request->getParsedBody();
+        $term = $form['term'] ?? null;
+        $query = SelectQuery::select('id, codigo_barra, nome')->from('product');
+        $data['results'] = [];
+        if ($term != null) {
         }
+        $data['results'] = $query->fetchAll();
+        return $this->SendJson($response, $data);
     }
 
     public function alterar($request, $response, $args)
@@ -148,16 +63,16 @@ class Produto extends Base
                 'acao' => 'c',
                 'id' => '',
                 'titulo' => 'Cadastro e alteração de produto',
-                'produto' => null
+                'product' => null
             ];
 
             return $this->getTwig()
-                ->render($response, $this->setView('produto'), $dadosTemplate)
+                ->render($response, $this->setView('product'), $dadosTemplate)
                 ->withHeader('Content-Type', 'text/html')
                 ->withStatus(200);
         }
 
-        $produto = SelectQuery::select()
+        $product = SelectQuery::select()
             ->from('product')
             ->where('id', '=', $id)
             ->fetch();
@@ -172,14 +87,14 @@ class Produto extends Base
             'acao' => 'e',
             'id' => $id,
             'titulo' => 'Cadastro e alteração de produto',
-            'produto' => $produto,
+            'product' => $product,
             'suppliers' => $suppliers,
-            'isExcluido' => $produto['excluido'] ?? false
+            'isExcluido' => $product['excluido'] ?? false
         ];
 
 
         return $this->getTwig()
-            ->render($response, $this->setView('produto'), $dadosTemplate)
+            ->render($response, $this->setView('product'), $dadosTemplate)
             ->withHeader('Content-Type', 'text/html')
             ->withStatus(200);
     }

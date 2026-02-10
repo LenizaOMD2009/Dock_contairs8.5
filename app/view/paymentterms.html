@@ -26,7 +26,7 @@
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-lg-6 col-md-6 col-md-12">
+                                <div class="col-lg-4 col-md-4 col-md-12">
                                     <div class="form-floating">
                                         <select class="form-select" id="codigo" name="codigo">
                                             <option selected>Selecione uma condição de pagamento</option>
@@ -53,11 +53,18 @@
                                         <label for="codigo">Condição de pagamento EX: (Dinheiro)</label>
                                     </div>
                                 </div>
-                                <div class="col-lg-6 col-md-6 col-md-12">
+                                <div class="col-lg-4 col-md-4 col-md-12">
                                     <div class="form-floating mb-3">
                                         <input type="text" class="form-control" id="titulo" name="titulo"
                                             placeholder="name@example.com" value="{{paymentTerms.titulo}}">
                                         <label for="titulo">Titulo condição pagamento EX: (Dinheiro)</label>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-md-4 col-md-12">
+                                    <div class="form-floating mb-3">
+                                        <input type="text" class="form-control" id="atalho" name="atalho"
+                                            placeholder="name@example.com" value="{{paymentTerms.atalho}}">
+                                        <label for="atalho">Atalho teclado EX: F6</label>
                                     </div>
                                 </div>
                             </div>

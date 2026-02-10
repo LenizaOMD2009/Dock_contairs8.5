@@ -50,7 +50,7 @@ $app->group('/cliente', function (RouteCollectorProxy $group) {
 $app->group('/produto', function (RouteCollectorProxy $group) {
     $group->get('/lista', app\controller\Produto::class . ':lista'); #->add(Auth::route());
     $group->get('/cadastro', app\controller\Produto::class . ':cadastro'); #->add(Auth::route());
-    $group->post('/listproduto', app\controller\Produto::class . ':listproduto');
+    $group->post('/listproductdata', app\controller\Produto::class . ':listproductdata');
     $group->post('/update', app\controller\Produto::class . ':update');
     $group->post('/insert', app\controller\Produto::class . ':insert');
     $group->get('/alterar/{id}', app\controller\Produto::class . ':alterar'); #->add(Auth::route());

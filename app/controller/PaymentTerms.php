@@ -37,9 +37,9 @@ class PaymentTerms extends Base
         #Captura todas a variaveis de forma mais segura VARIAVEIS POST.
         $form = $request->getParsedBody();
         #Qual a coluna da tabela deve ser ordenada.
-        $order = $form['order'][0]['column'];
+        $order = $form['order'][0]['column'] ?? 0;
         #Tipo de ordenação
-        $orderType = $form['order'][0]['dir'];
+        $orderType = $form['order'][0]['dir'] ?? 'desc';
         #Em qual registro se inicia o retorno dos registro, OFFSET
         $start = $form['start'];
         #Limite de registro a serem retornados do banco de dados LIMIT
@@ -47,7 +47,7 @@ class PaymentTerms extends Base
         $fields = [
             0 => 'id',
             1 => 'codigo',
-            2 => 'titulo',            
+            2 => 'titulo',
             3 => 'atalho',
         ];
         #Capturamos o nome do capo a ser ordenado.
@@ -155,7 +155,8 @@ class PaymentTerms extends Base
         }
         $FieldAndValues = [
             'codigo' => $form['codigo'],
-            'titulo' => $form['titulo']
+            'titulo' => $form['titulo'],
+            'atalho' => $form['atalho']
         ];
         $isUpdated = UpdateQuery::table('payment_terms')
             ->set($FieldAndValues)
