@@ -53,7 +53,6 @@ class Product extends Base
         $data['results'] = $query->fetchAll();
         return $this->SendJson($response, $data);
     }
-
     public function alterar($request, $response, $args)
     {
         $id = $args['id'] ?? null;
@@ -98,7 +97,6 @@ class Product extends Base
             ->withHeader('Content-Type', 'text/html')
             ->withStatus(200);
     }
-
     public function delete($request, $response)
     {
         try {
@@ -130,7 +128,6 @@ class Product extends Base
             ], 500);
         }
     }
-
     public function update($request, $response)
     {
         try {
@@ -176,7 +173,6 @@ class Product extends Base
             ], 500);
         }
     }
-
     public function insert($request, $response)
     {
         try {
