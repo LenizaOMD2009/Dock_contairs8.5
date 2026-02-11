@@ -13,7 +13,7 @@ final class Product extends AbstractMigration
         $table->addColumn('id', 'biginteger', ['identity' => true, 'null' => false])
             ->addColumn('supplier_id', 'biginteger', ['null' => true])
             ->addColumn('nome', 'string', ['limit' => 255, 'null' => false])
-            ->addColumn('codigo_barras', 'string', ['limit' => 20, 'null' => true])
+            ->addColumn('codigo_barra', 'string', ['limit' => 20, 'null' => true])
             ->addColumn('descricao_curta', 'text', ['null' => true])
             ->addColumn('descricao', 'text', ['null' => true])
             ->addColumn('preco_custo', 'decimal', ['precision' => 12, 'scale' => 2, 'null' => false])
@@ -23,7 +23,7 @@ final class Product extends AbstractMigration
             ->addColumn('data_cadastro', 'datetime', ['null' => true, 'default' => 'CURRENT_TIMESTAMP'])
             ->addColumn('data_atualizacao', 'datetime', ['null' => true, 'default' => 'CURRENT_TIMESTAMP'])
 
-            ->addForeignKey('supplier_id', 'supplier', 'id', ['delete' => 'RESTRICT'])
+            ->addForeignKey('supplier_id', 'supplier', 'id', ['delete'=> 'CASCADE', 'update'=> 'NO ACTION'])
             ->create();
     }
 }

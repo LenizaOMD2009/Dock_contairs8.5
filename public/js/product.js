@@ -9,7 +9,7 @@ const Form = document.getElementById('form');
 if (!Action) console.error('Elemento "acao" não encontrado no formulário');
 
 // Máscaras
-$('#codigo_barras').inputmask({
+$('#codigo_barra').inputmask({
     mask: "9999999999999",
     placeholder: ""
 });

@@ -24,4 +24,11 @@ class Sale extends Base
             ->withHeader('Content-Type', 'text/html')
             ->withStatus(200);
     }
+    public function insert($request, $response)
+    {
+        $form = $request->getParsedBody();
+        $id_produto = $form['id_produto'];
+
+        $FieldAndValues;
+    }
 }

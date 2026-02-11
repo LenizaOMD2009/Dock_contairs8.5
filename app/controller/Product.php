@@ -42,15 +42,117 @@ class Product extends Base
             ->withHeader('Content-Type', 'text/html')
             ->withStatus(200);
     }
+    public function listproduct($request, $response)
+    {
+          try {
+            $form = $request->getParsedBody();
+
+            $order = $form['order'][0]['column'] ?? 0;
+            $orderType = $form['order'][0]['dir'] ?? 'asc';
+            $start = $form['start'] ?? 0;
+            $length = $form['length'] ?? 10;
+
+            $fields = [
+                0 => 'id',
+                1 => 'nome',
+                2 => 'codigo_barras',
+                3 => 'descricao_curta',
+                4 => 'supplier_id',
+                5 => 'preco_custo',
+                6 => 'preco_venda'
+            ];
+
+            $orderField = $fields[$order] ?? 'id';
+            $term = $form['search']['value'] ?? '';
+
+            $query = SelectQuery::select()
+                ->from('product')
+                ->where('excluido', '=', false);
+
+            $queryTotal = SelectQuery::select('COUNT(*) as total')
+                ->from('product')
+                ->where('excluido', '=', false);
+
+            $totalRecords = $queryTotal->fetch()['total'] ?? 0;
+
+            if (!is_null($term) && $term !== '') {
+                $query->where('product.nome', 'ilike', "%{$term}%", 'or')
+                    ->where('product.descricao_curta', 'ilike', "%{$term}%");
+
+                $queryFiltered = SelectQuery::select('COUNT(*) as total')
+                    ->from('product')
+                    ->where('excluido', '=', false)
+                    ->where('product.nome', 'ilike', "%{$term}%", 'or')
+                    ->where('product.descricao_curta', 'ilike', "%{$term}%");
+
+                $totalFiltered = $queryFiltered->fetch()['total'] ?? 0;
+            } else {
+                $totalFiltered = $totalRecords;
+            }
+
+            $produtos = $query
+                ->order($orderField, $orderType)
+                ->limit($length, $start)
+                ->fetchAll();
+
+            $dataRows = [];
+            foreach ($produtos as $key => $value) {
+                $dataRows[$key] = [
+                    $value['id'],
+                    $value['nome'],
+                    $value['codigo_barras'],
+                    $value['descricao_curta'],
+                    $value['supplier_id'],
+                    $value['preco_custo'],
+                    $value['preco_venda'],
+                    "<a href='/produto/alterar/{$value['id']}' class='btn btn-warning'>Editar</a>
+                     <button type='button' onclick='Delete(" . $value['id'] . ");' class='btn btn-danger'>Excluir</button>"
+                ];
+            }
+
+            $data = [
+                'draw' => $form['draw'] ?? 1,
+                'recordsTotal' => $totalRecords,
+                'recordsFiltered' => $totalFiltered,
+                'data' => $dataRows
+            ];
+
+            $response->getBody()->write(json_encode($data));
+
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(200);
+        } catch (\Throwable $th) {
+            $response->getBody()->write(json_encode([
+                'draw' => $form['draw'] ?? 1,
+                'recordsTotal' => 0,
+                'recordsFiltered' => 0,
+                'data' => [],
+                'error' => $th->getMessage()
+            ]));
+
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(200);
+            }
+    }
     public function listproductdata($request, $response)
     {
         $form = $request->getParsedBody();
         $term = $form['term'] ?? null;
         $query = SelectQuery::select('id, codigo_barra, nome')->from('product');
-        $data['results'] = [];
         if ($term != null) {
+            $query->where('codigo_barra', 'ILIKE', "%$term%", 'or')
+                ->where('nome', 'ILIKE', "%$term%");
         }
-        $data['results'] = $query->fetchAll();
+        $data = [];
+        $results = $query->fetchAll();
+        foreach ($results as $key => $item) {
+            $data['results'][$key] = [
+                'id' => $item['id'],
+                'text' => 'Cód barra: ' . $item['codigo_barra'] . ' - ' . $item['nome']
+            ];
+        }
         return $this->SendJson($response, $data);
     }
     public function alterar($request, $response, $args)
@@ -137,7 +239,7 @@ class Product extends Base
             $FieldsAndValues = [
                 'supplier_id' => $form['supplier_id'],
                 'nome' => $form['nome'],
-                'codigo_barras' => $form['codigo_barras'],
+                'codigo_barra' => $form['codigo_barra'],
                 'descricao_curta' => $form['descricao_curta'],
                 'descricao' => $form['descricao'],
                 'preco_custo' => $form['preco_custo'],
@@ -181,7 +283,7 @@ class Product extends Base
             $FieldsAndValues = [
                 'supplier_id' => $form['supplier_id'],
                 'nome' => $form['nome'],
-                'codigo_barras' => $form['codigo_barras'],
+                'codigo_barra' => $form['codigo_barra'],
                 'descricao_curta' => $form['descricao_curta'],
                 'descricao' => $form['descricao'],
                 'preco_custo' => $form['preco_custo'],

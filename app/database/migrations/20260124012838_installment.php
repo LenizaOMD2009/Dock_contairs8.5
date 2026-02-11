@@ -16,7 +16,7 @@ final class Installment extends AbstractMigration
             ->addColumn('alterar_vencimento_conta', 'integer', ['null' => true])
             ->addColumn('data_cadastro', 'datetime', ['null' => true, 'default' => 'CURRENT_TIMESTAMP'])
             ->addColumn('data_atualizacao', 'datetime', ['null' => true, 'default' => 'CURRENT_TIMESTAMP'])
-            ->addForeignKey('id_pagamento', 'payment_terms', 'id', ['delete' => 'CASCADE', 'update' => 'NO ACTION'])
+            ->addForeignKey('id_pagamento', 'payment_terms', 'id', ['delete'=> 'CASCADE', 'update'=> 'NO ACTION'])
             ->create();
     }
 }

@@ -17,7 +17,7 @@ const tabela = new $("#tabela").DataTable({
         searchPlaceholder: 'Digite sua pesquisa...'
     },
     ajax: {
-        url: '/user/listuser',
+        url: '/usuario/listuser',
         type: 'POST'
     },
     layout: {
@@ -99,4 +99,3 @@ async function Delete(id) {
     tabela.ajax.reload();
 }
 window.Delete = Delete;
-DataTables.SetId('tabela').Post('/user/listuser');

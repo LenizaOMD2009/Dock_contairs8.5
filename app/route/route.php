@@ -8,6 +8,7 @@ use app\controller\PaymentTerms;
 use app\controller\Sale;
 use app\controller\Fornecedor;
 use app\controller\Login;
+use app\controller\Product;
 use Slim\Routing\RouteCollectorProxy;
 
 
@@ -26,6 +27,8 @@ $app->group('/login', function (RouteCollectorProxy $group) {
 $app->group('/venda', function (RouteCollectorProxy $group) {
     $group->get('/lista', Sale::class . ':lista');
     $group->get('/cadastro', Sale::class . ':cadastro');
+    $group->post('/insert', Sale::class . ':insert');
+    $group->get('/update', Sale::class . ':update');
 });
 
 $app->group('/usuario', function (RouteCollectorProxy $group) {
@@ -48,13 +51,14 @@ $app->group('/cliente', function (RouteCollectorProxy $group) {
     $group->post('/delete', cliente::class . ':delete');
 });
 $app->group('/produto', function (RouteCollectorProxy $group) {
-    $group->get('/lista', app\controller\Produto::class . ':lista'); #->add(Auth::route());
-    $group->get('/cadastro', app\controller\Produto::class . ':cadastro'); #->add(Auth::route());
-    $group->post('/listproductdata', app\controller\Produto::class . ':listproductdata');
-    $group->post('/update', app\controller\Produto::class . ':update');
-    $group->post('/insert', app\controller\Produto::class . ':insert');
-    $group->get('/alterar/{id}', app\controller\Produto::class . ':alterar'); #->add(Auth::route());
-    $group->post('/delete', app\controller\Produto::class . ':delete');
+    $group->get('/lista', Product::class . ':lista'); #->add(Auth::route());
+    $group->post('/listproduct', Product::class . ':listproduct'); #->add(Auth::route());
+    $group->get('/cadastro', Product::class . ':cadastro'); #->add(Auth::route());
+    $group->post('/listproductdata', Product::class . ':listproductdata');
+    $group->post('/update', Product::class . ':update');
+    $group->post('/insert', Product::class . ':insert');
+    $group->get('/alterar/{id}', Product::class . ':alterar'); #->add(Auth::route());
+    $group->post('/delete', Product::class . ':delete');
 });
 
 $app->group('/empresa', function (RouteCollectorProxy $group) {
