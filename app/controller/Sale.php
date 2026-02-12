@@ -29,6 +29,8 @@ class Sale extends Base
         $form = $request->getParsedBody();
         $id_produto = $form['id_produto'];
 
-        $FieldAndValues;
+        $fieldandValues = [
+            'id_produto' => $id_produto
+        ];
     }
 }

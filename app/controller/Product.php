@@ -44,7 +44,7 @@ class Product extends Base
     }
     public function listproduct($request, $response)
     {
-          try {
+        try {
             $form = $request->getParsedBody();
 
             $order = $form['order'][0]['column'] ?? 0;
@@ -55,7 +55,7 @@ class Product extends Base
             $fields = [
                 0 => 'id',
                 1 => 'nome',
-                2 => 'codigo_barras',
+                2 => 'codigo_barra',
                 3 => 'descricao_curta',
                 4 => 'supplier_id',
                 5 => 'preco_custo',
@@ -66,41 +66,24 @@ class Product extends Base
             $term = $form['search']['value'] ?? '';
 
             $query = SelectQuery::select()
-                ->from('product')
-                ->where('excluido', '=', false);
-
-            $queryTotal = SelectQuery::select('COUNT(*) as total')
-                ->from('product')
-                ->where('excluido', '=', false);
-
-            $totalRecords = $queryTotal->fetch()['total'] ?? 0;
+                ->from('vw_product');
 
             if (!is_null($term) && $term !== '') {
                 $query->where('product.nome', 'ilike', "%{$term}%", 'or')
                     ->where('product.descricao_curta', 'ilike', "%{$term}%");
-
-                $queryFiltered = SelectQuery::select('COUNT(*) as total')
-                    ->from('product')
-                    ->where('excluido', '=', false)
-                    ->where('product.nome', 'ilike', "%{$term}%", 'or')
-                    ->where('product.descricao_curta', 'ilike', "%{$term}%");
-
-                $totalFiltered = $queryFiltered->fetch()['total'] ?? 0;
-            } else {
-                $totalFiltered = $totalRecords;
             }
 
             $produtos = $query
                 ->order($orderField, $orderType)
                 ->limit($length, $start)
                 ->fetchAll();
-
+            $totalRecords = count($produtos);
             $dataRows = [];
             foreach ($produtos as $key => $value) {
                 $dataRows[$key] = [
                     $value['id'],
                     $value['nome'],
-                    $value['codigo_barras'],
+                    $value['codigo_barra'],
                     $value['descricao_curta'],
                     $value['supplier_id'],
                     $value['preco_custo'],
@@ -113,7 +96,7 @@ class Product extends Base
             $data = [
                 'draw' => $form['draw'] ?? 1,
                 'recordsTotal' => $totalRecords,
-                'recordsFiltered' => $totalFiltered,
+                'recordsFiltered' => $totalRecords,
                 'data' => $dataRows
             ];
 
@@ -134,7 +117,7 @@ class Product extends Base
             return $response
                 ->withHeader('Content-Type', 'application/json')
                 ->withStatus(200);
-            }
+        }
     }
     public function listproductdata($request, $response)
     {
@@ -237,61 +220,53 @@ class Product extends Base
             $id = $form['id'];
 
             $FieldsAndValues = [
-                'supplier_id' => $form['supplier_id'],
                 'nome' => $form['nome'],
                 'codigo_barra' => $form['codigo_barra'],
                 'descricao_curta' => $form['descricao_curta'],
                 'descricao' => $form['descricao'],
                 'preco_custo' => $form['preco_custo'],
                 'preco_venda' => $form['preco_venda'],
-                'ativo' => isset($form['ativo']),
-                'excluido' => isset($form['excluido']),
-                'data_atualizacao' => date('Y-m-d H:i:s')
+                'ativo' => (isset($form['ativo'])) ? $form['ativo'] : 'false',
             ];
-
-            $IsUpdate = UpdateQuery::table('product')
-                ->set($FieldsAndValues)
-                ->where('id', '=', $id)
-                ->update();
-
+            if (isset($form['supplier_id']) and $form['supplier_id'] !== '') {
+                $FieldsAndValues['supplier_id'] = $form['supplier_id'];
+            }
+            $IsUpdate = UpdateQuery::table('product')->set($FieldsAndValues)->where('id', '=', $id)->update();
             if (!$IsUpdate) {
-                return $this->SendJson($response, [
+                $data = [
                     'status' => false,
                     'msg' => 'Erro ao atualizar produto',
                     'id' => 0
-                ], 200);
+                ];
+                return $this->SendJson($response, $data, 200);
             }
-
-            return $this->SendJson($response, [
+            $data = [
                 'status' => true,
-                'msg' => 'Produto atualizado com sucesso!',
+                'msg' => 'Dados alterados com sucesso!',
                 'id' => $id
-            ], 200);
+            ];
+            return $this->SendJson($response, $data, 200);
         } catch (\Exception $e) {
-            return $this->SendJson($response, [
-                'status' => false,
-                'msg' => 'Exceção: ' . $e->getMessage(),
-                'id' => 0
-            ], 500);
+            $data = ['status' => false, 'msg' => 'Exceção: ' . $e->getMessage(), 'id' => 0];
+            return $this->SendJson($response, $data, 500);
         }
     }
     public function insert($request, $response)
     {
         try {
             $form = $request->getParsedBody();
-
             $FieldsAndValues = [
-                'supplier_id' => $form['supplier_id'],
                 'nome' => $form['nome'],
                 'codigo_barra' => $form['codigo_barra'],
                 'descricao_curta' => $form['descricao_curta'],
                 'descricao' => $form['descricao'],
                 'preco_custo' => $form['preco_custo'],
                 'preco_venda' => $form['preco_venda'],
-                'ativo' => ($form['ativo']),
-                'excluido' => ($form['excluido'])
+                'ativo' => ($form['ativo'])
             ];
-
+            if (isset($form['supplier_id']) and $form['supplier_id'] !== '') {
+                $FieldsAndValues['supplier_id'] = $form['supplier_id'];
+            }
             $IsSave = InsertQuery::table('product')->save($FieldsAndValues);
 
             if (!$IsSave) {
