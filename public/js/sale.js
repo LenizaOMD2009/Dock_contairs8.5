@@ -1,4 +1,5 @@
-import { Validate } from "./Validate";
+import { Validate } from "./Validate.js";
+import { Requests } from "./Requests.js";
 
 const insertItemButton = document.getElementById('insertItemButton');
 // Atualizar relógio em tempo real
@@ -47,7 +48,8 @@ async function InsertSale() {
         return;
     }
     try {
-        const response = await Request.SetForm('form').Post('/venda/insert');
+        const response = await Requests.SetForm('form').Post('/venda/insert');
+
     } catch (error) {
         throw new Error(error);
     }
@@ -184,7 +186,7 @@ document.addEventListener('click', function (e) {
 });
 
 insertItemButton.addEventListener('click', async () => {
-    alert('Clickou no item');
+    await InsertSale();
 });
 
 document.addEventListener('keydown', (e) => {

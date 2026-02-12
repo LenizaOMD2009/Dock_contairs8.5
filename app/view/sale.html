@@ -76,10 +76,8 @@
                 <button class="icon-btn"><i class="fas fa-sign-out-alt"></i></button>
             </div>
         </header>
-
         <!-- Área de Conteúdo -->
         <div class="content-wrapper">
-
             <!-- Seção de Produtos -->
             <section class="products-section">
                 <div class="search-box">
@@ -91,7 +89,7 @@
                             <div class="input-group">
                                 <select class="form-select" id="pesquisa" name="pesquisa"
                                     aria-label="Example select with button addon" required>
-                                    <option selected>Digite o id, nome, cód. barra do produto...</option>
+                                    <option value="" selected>Digite o id, nome, cód. barra do produto...</option>
                                 </select>
                                 <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal"
                                     data-bs-target="#pesquisaProdutoModal">
@@ -106,13 +104,11 @@
                         </div>
                     </form>
                 </div>
-
                 <div class="products-list">
                     <div class="products-header">
                         <h3>Produtos</h3>
                         <span class="product-count" id="total_item">0</span>
                     </div>
-
                     <table class="products-table">
                         <thead>
                             <tr>
