@@ -109,4 +109,69 @@ class Sale extends Base
             ], 500);
         }
     }
+    public function alterar($request, $response, $args)
+    {
+    $id = $args['id'];
+    $sale = SelectQuery::select()
+    ->from('sale') 
+    ->where('id', '=', $id)
+    ->fetch();
+if (!$sale){
+    return header('Location: /venda/lista');
+    die;
+    }
+    $dadosTemplate = [
+        'titulo' => 'Página inicial',
+        'acao' => 'e',
+        'id' => $id,
+        'sale' => $sale
+    ];
+    return $this->getTwig()
+    ->render($response, $this->setView('sale'), $dadosTemplate)
+    ->WithHeader('Content-Type', 'text/html')
+    ->WithStatus(200);
+    }
+    public function InsertItemSale($request, $response)
+    {
+        $form = $request->getParsedBody();
+        $id = $form['id'] ?? null;
+        $id_produto = $form['pesquisa'];
+        if(empty($id) or is_null($id)) {
+            return $this->SendJson($response, [
+                'status' => false,
+                'msg' => 'Restrição: O ID da venda é obrigatório!',
+                'id' => 0
+            ], 403);
+            }
+
+        try{
+            $produto = SelectQuery::select()->from('product')->where('id', '=', $id_produto)->fetch();
+            if (!$produto) {
+                return $this->SendJson($response, [
+                    'status' => false,
+                    'msg' => 'Restrição: Produto não encontrado!',
+                    'id' => 0
+                ], 403);
+            }
+            $FieldAndValue = [
+                'id_venda' => $id,
+                'id_produto' => $id_produto,
+                'quantidade' => 1,
+                'total_bruto' => $produto['valor'],
+                'total_liquido' => $produto['valor'], 
+                'desconto' => 0,
+                'acrescimo' => 0,   
+                'nome' => $produto['nome'],
+            ];
+            return $this->SendJson($FieldAndValue);
+        } catch (\Exception $e) {
+            return $this->SendJson($response, [
+                'status' => false,
+                'msg' => 'Restrição: ' . $e->getMessage(),
+                'id' => 0
+            ], 500);
+
+        }
+    }
+
 }
