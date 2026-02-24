@@ -14,6 +14,8 @@ final class Contact extends AbstractMigration
         ->addColumn('id_users', 'biginteger')
         ->addColumn('id_customer', 'biginteger')
         ->addColumn('id_company', 'biginteger')
+        ->addColumn('tipo', 'text', ['null' => true])
+        ->addColumn('endereco_contato', 'text', ['null' => true])
         ->addColumn('documento', 'string', ['limit' => 30])
         ->addColumn('email', 'string', ['limit' => 150])
         ->addColumn('telefone', 'string', ['limit' => 30])
