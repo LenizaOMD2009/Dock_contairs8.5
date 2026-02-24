@@ -123,68 +123,77 @@ class Sale extends Base
             $start = $form['start'] ?? 0;
             #Limite de registro a serem retornados do banco de dados LIMIT
             $length = $form['length'] ?? 10;
+            #ID da venda para listar seus itens
+            $id_venda = $form['id_venda'] ?? null;
+            
+            if (empty($id_venda) || is_null($id_venda)) {
+                return $this->SendJson($response, [
+                    'draw' => $form['draw'] ?? 1,
+                    'recordsTotal' => 0,
+                    'recordsFiltered' => 0,
+                    'data' => [],
+                    'error' => 'ID da venda é obrigatório'
+                ], 400);
+            }
             
             $fields = [
-                0 => 'id',
-                1 => 'nome_fantasia',
-                2 => 'sobrenome_razao',
-                3 => 'cpf_cnpj',
-                4 => 'rg_ie',
-                5 => 'data_nascimento_abertura'
+                0 => 'si.id',
+                1 => 'p.codigo_barra',
+                2 => 'p.nome',
+                3 => 'si.total_bruto'
             ];
             
             #Capturamos o nome do campo a ser ordenado.
-            $orderField = $fields[$order] ?? 'id';
+            $orderField = $fields[$order] ?? 'si.id';
             #O termo pesquisado
             $term = $form['search']['value'] ?? '';
             
-            $query = SelectQuery::select('id,nome_fantasia,sobrenome_razao,cpf_cnpj,rg_ie,data_nascimento_abertura')->from('company');
+            $query = SelectQuery::select('si.id, p.codigo_barra, p.nome, si.total_bruto')
+                ->from('sale_item si')
+                ->join('product p', 'si.id_produto', '=', 'p.id')
+                ->where('si.id_venda', '=', $id_venda);
             
-            $queryTotal = SelectQuery::select('COUNT(*) as total')->from('company');
+            $queryTotal = SelectQuery::select('COUNT(*) as total')
+                ->from('sale_item')
+                ->where('id_venda', '=', $id_venda);
             $totalRecords = $queryTotal->fetch()['total'] ?? 0;
             
             if (!is_null($term) && ($term !== '')) {
-                $query->where('company.nome_fantasia', 'ilike', "%{$term}%", 'or')
-                    ->where('company.sobrenome_razao', 'ilike', "%{$term}%", 'or')
-                    ->where('company.cpf_cnpj', 'ilike', "%{$term}%", 'or')
-                    ->where('company.rg_ie', 'ilike', "%{$term}%")
-                    ->where('company.data_nascimento_abertura', 'ilike', "%{$term}%");
+                $query->where('p.codigo_barra', 'ilike', "%{$term}%", 'or')
+                    ->where('p.nome', 'ilike', "%{$term}%");
 
-                $queryFiltered = SelectQuery::select('COUNT(*) as total')->from('company')
-                    ->where('company.nome_fantasia', 'ilike', "%{$term}%", 'or')
-                    ->where('company.sobrenome_razao', 'ilike', "%{$term}%", 'or')
-                    ->where('company.cpf_cnpj', 'ilike', "%{$term}%", 'or')
-                    ->where('company.rg_ie', 'ilike', "%{$term}%")
-                    ->where('company.data_nascimento_abertura', 'ilike', "%{$term}%");
+                $queryFiltered = SelectQuery::select('COUNT(*) as total')
+                    ->from('sale_item si')
+                    ->join('product p', 'si.id_produto', '=', 'p.id')
+                    ->where('si.id_venda', '=', $id_venda)
+                    ->where('p.codigo_barra', 'ilike', "%{$term}%", 'or')
+                    ->where('p.nome', 'ilike', "%{$term}%");
                 $totalFiltered = $queryFiltered->fetch()['total'] ?? 0;
             } else {
                 $totalFiltered = $totalRecords;
             }
 
-            $users = $query
+            $items = $query
                 ->order($orderField, $orderType)
                 ->limit($length, $start)
                 ->fetchAll();
             
-            $userData = [];
-            foreach ($users as $key => $value) {
-                $userData[$key] = [
-                    $value['id'],
-                    $value['nome_fantasia'],
-                    $value['sobrenome_razao'],
-                    $value['cpf_cnpj'],
-                    $value['rg_ie'],
-                    $value['data_nascimento_abertura'],
-                    "<a href='/empresa/alterar/{$value['id']}' class='btn btn-warning'>Editar</a>
-                    <button type='button'  onclick='Delete(" . $value['id'] . ");' class='btn btn-danger'>Excluir</button>"
+            $itemData = [];
+            foreach ($items as $key => $value) {
+                $itemData[$key] = [
+                    $value['codigo_barra'],
+                    $value['nome'],
+                    number_format($value['total_bruto'], 2, ',', '.'),
+                    "<a href='/sale/editar-item/{$id_venda}/{$value['id']}' class='btn btn-warning btn-sm'>Editar</a>
+                    <button type='button' onclick='DeleteItem(" . $value['id'] . ", " . $id_venda . ");' class='btn btn-danger btn-sm'>Excluir</button>"
                 ];
             }
             
             $data = [
-                'draw' => $form['draw'] ?? 1,
+                'draw' => $form['draw'] ?? 1,   
                 'recordsTotal' => $totalRecords,
                 'recordsFiltered' => $totalFiltered,
-                'data' => $userData
+                'data' => $itemData
             ];
             
             $payload = json_encode($data);
@@ -215,7 +224,7 @@ class Sale extends Base
             ->where('id', '=', $id)
             ->fetch();
         if (!$sale) {
-            return header('Location: /venda/lista');
+            return header('Location: /sale/lista');
             die;
         }
         $dadosTemplate = [
@@ -232,9 +241,9 @@ class Sale extends Base
     public function InsertItemSale($request, $response)
     {
         $form = $request->getParsedBody();
-        $id = $form['id'] ?? null;
+        $id_venda = $form['id'] ?? null;
         $id_produto = $form['pesquisa'];
-        if (empty($id) or is_null($id)) {
+        if (empty($id_venda) or is_null($id_venda)) {
             return $this->SendJson($response, [
                 'status' => false,
                 'msg' => 'Restrição: O ID da venda é obrigatório!',
@@ -252,21 +261,71 @@ class Sale extends Base
                 ], 403);
             }
             $FieldAndValue = [
-                'id_venda' => $id,
+                'id_venda' => $id_venda,
                 'id_produto' => $id_produto,
                 'quantidade' => 1,
-                'total_bruto' => $produto['valor'],
-                'total_liquido' => $produto['valor'],
+                'total_bruto' => $produto['preco_venda'] ?? $produto['valor'],
+                'total_liquido' => $produto['preco_venda'] ?? $produto['valor'],
                 'desconto' => 0,
-                'acrescimo' => 0,
-                'nome' => $produto['nome'],
+                'acrescimo' => 0
             ];
-            return $this->SendJson($FieldAndValue);
+            
+            #Tenta inserir o item na venda
+            $IsInserted = InsertQuery::table('sale_item')->save($FieldAndValue);
+            if (!$IsInserted) {
+                return $this->SendJson($response, [
+                    'status' => false,
+                    'msg' => 'Restrição: Falha ao inserir o item!',
+                    'id' => 0
+                ], 403);
+            }
+            
+            return $this->SendJson($response, [
+                'status' => true,
+                'msg' => 'Item adicionado com sucesso!',
+                'id' => $id_venda
+            ], 201);
         } catch (\Exception $e) {
             return $this->SendJson($response, [
                 'status' => false,
                 'msg' => 'Restrição: ' . $e->getMessage(),
                 'id' => 0
+            ], 500);
+        }
+    }
+    
+    public function DeleteItemSale($request, $response)
+    {
+        $form = $request->getParsedBody();
+        $id_item = $form['id'] ?? null;
+        $id_venda = $form['id_venda'] ?? null;
+        
+        if (empty($id_item) || is_null($id_item)) {
+            return $this->SendJson($response, [
+                'status' => false,
+                'msg' => 'Restrição: O ID do item é obrigatório!'
+            ], 403);
+        }
+        
+        try {
+            $item = SelectQuery::select('id')->from('sale_item')->where('id', '=', $id_item)->fetch();
+            if (!$item) {
+                return $this->SendJson($response, [
+                    'status' => false,
+                    'msg' => 'Restrição: Item não encontrado!'
+                ], 404);
+            }
+            
+            #TODO: Implementar delete na query builder
+            return $this->SendJson($response, [
+                'status' => true,
+                'msg' => 'Item removido com sucesso!',
+                'id_venda' => $id_venda
+            ], 200);
+        } catch (\Exception $e) {
+            return $this->SendJson($response, [
+                'status' => false,
+                'msg' => 'Restrição: ' . $e->getMessage()
             ], 500);
         }
     }
