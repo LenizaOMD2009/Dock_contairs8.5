@@ -57,6 +57,15 @@ final class Index extends AbstractMigration
             ON company USING gin (sobrenome_razao gin_trgm_ops);
         CREATE INDEX idx_company_cpf_cnpj ON company (cpf_cnpj);
         CREATE INDEX idx_company_ativo ON company (ativo);
+
+
+        ---------------------------------------
+        -- MVW_STOCK_MOVEMENT
+        ---------------------------------------
+        
+
+
+
         ");
     }
 }
